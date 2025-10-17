@@ -1,0 +1,658 @@
+// =====================================================
+// ESTILOS PRINCIPALES ONOXFRI - TEMA FUTURISTA
+// =====================================================
+
+// Importar variables (Sass moderno)
+@use 'variables' as *;
+
+// Reset y estilos base
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+/* Variables globales de color (tema) */
+:root {
+  --bg-primary: #{$bg-dark};
+  --bg-secondary: #{$bg-dark-secondary};
+  --text-primary: #{$text-light};
+  --text-secondary: #{$text-light-secondary};
+  --accent-primary: #{$primary-purple};
+  --accent-secondary: #{$primary-purple-light};
+}
+
+[data-theme="dark"] {
+  --bg-primary: #{$bg-dark};
+  --bg-secondary: #{$bg-dark-secondary};
+  --text-primary: #{$text-light};
+  --text-secondary: #{$text-light-secondary};
+  --accent-primary: #{$primary-purple};
+  --accent-secondary: #{$primary-purple-light};
+}
+
+[data-theme="light"] {
+  --bg-primary: #{$bg-light};
+  --bg-secondary: #{$bg-light-secondary};
+  --text-primary: #{$text-primary};
+  --text-secondary: #{$text-secondary};
+  --accent-primary: #{$primary-purple};
+  --accent-secondary: #{$primary-purple-light};
+}
+
+body {
+  font-family: $font-primary;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  transition: background-color $transition-normal, color $transition-normal;
+  overflow-x: hidden;
+}
+
+// =====================================================
+// SIDEBAR / DOWNBAR RESPONSIVE
+// =====================================================
+
+.onoxfri-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background: $gradient-primary;
+  padding: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  z-index: $z-fixed;
+  transition: transform $transition-normal;
+  border-right: 2px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: $breakpoint-lg) {
+    transform: translateX(-100%);
+
+    &.mobile-open {
+      transform: translateX(0);
+    }
+  }
+
+  .sidebar-header {
+    text-align: center;
+    margin-bottom: $spacing-xxl;
+
+    .logo {
+      font-family: $font-logo;
+      font-size: $font-size-3xl;
+      font-weight: 900;
+      color: $text-light;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: $spacing-md;
+      @include glitch-effect(3s);
+      animation: fadeInUp 0.8s ease-out;
+
+      &::before,
+      &::after {
+        animation-duration: 3s;
+      }
+    }
+
+    .logo-subtitle {
+      font-family: $font-secondary;
+      font-size: $font-size-sm;
+      color: rgba(255, 255, 255, 0.8);
+      letter-spacing: 1px;
+    }
+  }
+
+  .sidebar-nav {
+    flex: 1;
+
+    .nav-item {
+      margin-bottom: $spacing-md;
+      opacity: 0;
+      animation: slideInLeft 0.5s ease-out forwards;
+
+      @for $i from 1 through 10 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{$i * 0.1}s;
+        }
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        padding: $spacing-md $spacing-lg;
+        color: $text-light;
+        text-decoration: none;
+        border-radius: $border-radius-lg;
+        transition: all $transition-normal;
+        font-family: $font-secondary;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+
+        i {
+          margin-right: $spacing-md;
+          font-size: $font-size-lg;
+          transition: transform $transition-normal;
+        }
+
+        .link-text {
+          flex: 1;
+        }
+
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: rgba(255, 255, 255, 0.1);
+          transition: left $transition-normal;
+        }
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.1);
+          transform: translateX(5px);
+
+          i {
+            transform: scale(1.2);
+          }
+
+          &::before {
+            left: 0;
+          }
+        }
+
+        &.active {
+          background: rgba(255, 255, 255, 0.2);
+          @include neon-glow($primary-purple-light, 0.3);
+        }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: $spacing-lg;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    .theme-toggle {
+      width: 100%;
+      padding: $spacing-md;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: $border-radius-lg;
+      color: $text-light;
+      font-family: $font-secondary;
+      cursor: pointer;
+      transition: all $transition-normal;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        @include neon-glow();
+      }
+    }
+  }
+}
+
+// Downbar para móviles
+.onoxfri-downbar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: $gradient-primary;
+  padding: $spacing-md;
+  z-index: $z-fixed;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: $breakpoint-lg) {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .downbar-item {
+    flex: 1;
+    text-align: center;
+    opacity: 0.7;
+    transition: opacity $transition-normal;
+
+    &.active {
+      opacity: 1;
+      @include neon-glow();
+    }
+
+    .downbar-link {
+      display: block;
+      padding: $spacing-sm;
+      color: $text-light;
+      text-decoration: none;
+
+      i {
+        font-size: $font-size-xl;
+        margin-bottom: $spacing-xs;
+        display: block;
+      }
+
+      .link-text {
+        font-size: $font-size-xs;
+        font-family: $font-secondary;
+      }
+
+      &:hover {
+        .downbar-item {
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+// =====================================================
+// CONTENIDO PRINCIPAL
+// =====================================================
+
+.main-content {
+  margin-left: 280px;
+  min-height: 100vh;
+  padding: $spacing-xl;
+  transition: margin-left $transition-normal;
+
+  @media (max-width: $breakpoint-lg) {
+    margin-left: 0;
+    padding: $spacing-lg $spacing-md;
+  }
+}
+
+// =====================================================
+// BOTONES FUTURISTAS
+// =====================================================
+
+.btn-futuristic {
+  @include futuristic-button;
+}
+
+.btn-secondary-futuristic {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid $primary-purple;
+  color: $text-light;
+  font-family: $font-secondary;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: $border-radius-lg;
+  padding: $spacing-md $spacing-lg;
+  cursor: pointer;
+  transition: all $transition-normal;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    background: $primary-purple;
+    transform: translateY(-2px);
+    @include neon-glow();
+  }
+}
+
+.btn-ghost-futuristic {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: var(--text-primary);
+  font-family: $font-secondary;
+  font-weight: 500;
+  border-radius: $border-radius-lg;
+  padding: $spacing-sm $spacing-md;
+  cursor: pointer;
+  transition: all $transition-normal;
+
+  &:hover {
+    border-color: $primary-purple;
+    color: $primary-purple;
+    @include neon-glow($primary-purple, 0.3);
+  }
+}
+
+// =====================================================
+// FORMULARIOS FUTURISTAS
+// =====================================================
+
+.form-futuristic {
+  .form-group {
+    margin-bottom: $spacing-lg;
+
+    label {
+      display: block;
+      margin-bottom: $spacing-sm;
+      font-family: $font-secondary;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: $font-size-sm;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: $spacing-md $spacing-lg;
+      background: var(--bg-secondary);
+      border: 2px solid rgba(75, 0, 130, 0.3);
+      border-radius: $border-radius-lg;
+      color: var(--text-primary);
+      font-family: $font-primary;
+      font-size: $font-size-base;
+      transition: all $transition-normal;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-purple;
+        @include neon-glow();
+      }
+
+      &::placeholder {
+        color: var(--text-secondary);
+      }
+    }
+  }
+}
+
+// =====================================================
+// CARDS FUTURISTAS
+// =====================================================
+
+.card-futuristic {
+  background: var(--bg-secondary);
+  border: 2px solid rgba(75, 0, 130, 0.2);
+  border-radius: $border-radius-xl;
+  padding: $spacing-xl;
+  position: relative;
+  overflow: hidden;
+  transition: all $transition-normal;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: $gradient-primary;
+  }
+
+  &:hover {
+    border-color: $primary-purple;
+    @include neon-glow($primary-purple, 0.2);
+    transform: translateY(-5px);
+  }
+
+  .card-header {
+    margin-bottom: $spacing-lg;
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: $font-logo;
+      color: $primary-purple;
+      margin-bottom: $spacing-sm;
+    }
+
+    .card-subtitle {
+      font-family: $font-secondary;
+      color: var(--text-secondary);
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+// =====================================================
+// LANDING PAGE
+// =====================================================
+
+.landing-container {
+  min-height: 100vh;
+  background: radial-gradient(ellipse at center, rgba(75, 0, 130, 0.1) 0%, transparent 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(75,0,130,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.3;
+  }
+
+  .landing-content {
+    text-align: center;
+    z-index: 2;
+    max-width: 800px;
+    padding: $spacing-xl;
+
+    .landing-logo {
+      font-family: $font-logo;
+      font-size: $font-size-5xl;
+      font-weight: 900;
+      color: $primary-purple;
+      margin-bottom: $spacing-lg;
+      @include glitch-effect(4s);
+      animation: fadeInUp 1s ease-out;
+
+      &::before,
+      &::after {
+        animation-duration: 4s;
+      }
+    }
+
+    .landing-subtitle {
+      font-family: $font-secondary;
+      font-size: $font-size-xl;
+      color: var(--text-primary);
+      margin-bottom: $spacing-md;
+      opacity: 0;
+      animation: fadeInUp 1s ease-out 0.3s forwards;
+    }
+
+    .landing-description {
+      font-size: $font-size-lg;
+      color: var(--text-secondary);
+      margin-bottom: $spacing-xxl;
+      opacity: 0;
+      animation: fadeInUp 1s ease-out 0.6s forwards;
+    }
+
+    .landing-cta {
+      opacity: 0;
+      animation: fadeInUp 1s ease-out 0.9s forwards;
+
+      .btn-landing {
+        @include futuristic-button;
+        font-size: $font-size-lg;
+        padding: $spacing-lg $spacing-xxl;
+        margin: 0 $spacing-md;
+        animation: pulse 2s infinite;
+
+        @media (max-width: $breakpoint-sm) {
+          display: block;
+          margin: $spacing-md 0;
+        }
+      }
+    }
+  }
+}
+
+// =====================================================
+// DASHBOARD
+// =====================================================
+
+.dashboard-container {
+  padding: $spacing-xl;
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xxl;
+
+    .dashboard-title {
+      font-family: $font-logo;
+      font-size: $font-size-3xl;
+      color: $primary-purple;
+    }
+
+    .dashboard-actions {
+      display: flex;
+      gap: $spacing-md;
+    }
+  }
+
+  .dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xxl;
+
+    .stat-card {
+      @extend .card-futuristic;
+      text-align: center;
+
+      .stat-value {
+        font-family: $font-logo;
+        font-size: $font-size-3xl;
+        font-weight: 700;
+        color: $primary-purple;
+        margin-bottom: $spacing-sm;
+      }
+
+      .stat-label {
+        font-family: $font-secondary;
+        color: var(--text-secondary);
+        font-size: $font-size-sm;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+    }
+  }
+}
+
+// =====================================================
+// LOGIN / REGISTRO
+// =====================================================
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 20%, rgba(75, 0, 130, 0.2) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(138, 43, 226, 0.2) 0%, transparent 50%);
+
+  .auth-card {
+    @extend .card-futuristic;
+    max-width: 400px;
+    width: 100%;
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: $spacing-xl;
+
+      .auth-logo {
+        font-family: $font-logo;
+        font-size: $font-size-2xl;
+        color: $primary-purple;
+        margin-bottom: $spacing-sm;
+      }
+
+      .auth-subtitle {
+        color: var(--text-secondary);
+        font-size: $font-size-sm;
+      }
+    }
+
+    .auth-form {
+      @extend .form-futuristic;
+
+      .form-actions {
+        margin-top: $spacing-xl;
+        display: flex;
+        gap: $spacing-md;
+
+        @media (max-width: $breakpoint-sm) {
+          flex-direction: column;
+        }
+      }
+    }
+  }
+}
+
+// =====================================================
+// UTILIDADES
+// =====================================================
+
+.text-gradient {
+  background: $gradient-primary;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gradient {
+  background: $gradient-primary;
+}
+
+.border-gradient {
+  @include gradient-border();
+}
+
+.animate-fade-in {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+// =====================================================
+// RESPONSIVE DESIGN
+// =====================================================
+
+@media (max-width: $breakpoint-sm) {
+  .main-content {
+    padding: $spacing-md;
+  }
+
+  .landing-container .landing-content {
+    padding: $spacing-md;
+
+    .landing-logo {
+      font-size: $font-size-4xl;
+    }
+  }
+}
+
+// =====================================================
+// TEMA OSCURO/CLARO
+// =====================================================
+
+.theme-dark {
+  --bg-primary: #{$bg-dark};
+  --bg-secondary: #{$bg-dark-secondary};
+  --text-primary: #{$text-light};
+  --text-secondary: #{$text-light-secondary};
+}
+
+.theme-light {
+  --bg-primary: #{$bg-light};
+  --bg-secondary: #{$bg-light-secondary};
+  --text-primary: #{$text-primary};
+  --text-secondary: #{$text-secondary};
+}

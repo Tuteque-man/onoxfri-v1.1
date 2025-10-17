@@ -9,10 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.5.22"
+    "@fortawesome/fontawesome-free": "^6.5.1",
+    "animate.css": "^4.1.1",
+    "axios": "^1.6.2",
+    "chart.js": "^4.4.0",
+    "lucide-vue-next": "^0.294.0",
+    "pinia": "^2.1.7",
+    "vue": "^3.5.22",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.1.7"
+    "@vitejs/plugin-vue": "^4.6.2",
+    "sass": "^1.93.2",
+    "vite": "^4.4.0"
   }
 }

@@ -7,12 +7,6 @@
           Gestión de Categorías
         </div>
       </div>
-      <div class="page-header">
-        <div class="page-title">
-          <i class="fas fa-tags"></i>
-          Gestión de Categorías
-        </div>
-      </div>
 
       <div class="coming-soon">
         <i class="fas fa-construction"></i>
@@ -30,6 +24,11 @@
 .categorias-container {
   width: 100%;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
 }
 
 .page-header {

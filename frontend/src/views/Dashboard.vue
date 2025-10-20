@@ -1,5 +1,6 @@
 <template>
   <div class="dashboard-container">
+
     <!-- Contenido principal (Sidebar ahora está en App.vue) -->
     <div class="main-content">
       <div class="dashboard-header">
@@ -140,6 +141,22 @@
         </div>
       </div>
     </div>
+
+    <!-- Auth notice (top-right) -->
+    <transition name="modal-fade">
+      <div v-if="authNotice.visible" class="modal-fixed">
+        <div class="modal-card" role="status" aria-live="polite">
+          <div class="modal-header">
+            <i class="fas fa-check-circle" style="color:#3bd16f"></i>
+            <span class="modal-title">Operación exitosa</span>
+          </div>
+          <div class="modal-body">{{ authNotice.message }}</div>
+          <div class="modal-actions">
+            <button class="btn-futuristic" type="button" @click="authNotice.visible=false">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -158,6 +175,9 @@ const stats = reactive({
 })
 
 const productosStockBajo = ref([])
+
+// Aviso tras autenticación
+const authNotice = reactive({ visible: false, message: '' })
 const categoriaData = ref([])
 const recentActivity = ref([
   {
@@ -211,6 +231,23 @@ const refreshData = () => {
 // Lifecycle
 onMounted(() => {
   loadDashboardData()
+  try {
+    const msg = sessionStorage.getItem('auth_notice')
+    if (msg) {
+      authNotice.message = msg
+      authNotice.visible = true
+      sessionStorage.removeItem('auth_notice')
+      setTimeout(() => { authNotice.visible = false }, 2500)
+    } else {
+      // Fallback: si no hay mensaje pero hay token, mostrar confirmación genérica
+      const token = localStorage.getItem('onoxfri_token')
+      if (token) {
+        authNotice.message = 'Inicio de sesión exitoso'
+        authNotice.visible = true
+        setTimeout(() => { authNotice.visible = false }, 1800)
+      }
+    }
+  } catch {}
 })
 </script>
 
@@ -564,6 +601,32 @@ onMounted(() => {
   text-align: center;
   color: var(--text-secondary);
 }
+
+/* Top-right auth notice modal */
+.modal-fixed {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 3000;
+}
+.modal-card {
+  width: min(92vw, 380px);
+  background: var(--bg-primary, #12011f);
+  border: 1px solid rgba(138, 43, 226, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  padding: 0.9rem 1rem;
+}
+.modal-header { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem; }
+.modal-title { color: #fff; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+.modal-body { color:#eae3f7; margin:0.25rem 0 0.6rem; line-height:1.35; text-align:left; }
+.modal-actions { display:flex; justify-content:flex-end; }
+
+/* Modal transition */
+.modal-fade-enter-active,
+.modal-fade-leave-active { transition: opacity 0.18s ease; }
+.modal-fade-enter-from,
+.modal-fade-leave-to { opacity: 0; }
 
 /* =====================================================
    RESPONSIVE DESIGN

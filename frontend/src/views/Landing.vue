@@ -477,14 +477,29 @@ onMounted(() => {
 .landing-container {
   min-height: 100vh;
   width: 100%;
-  background: radial-gradient(ellipse at center, rgba(75, 0, 130, 0.1) 0%, transparent 70%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
-  padding-top: 10vh; /* Aumentado para mejor centrado vertical */
   z-index: 2;
+}
+
+/* Fondo del landing más oscuro (solo para esta vista) */
+.matrix-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  /* Capa de oscurecimiento + gradientes temáticos */
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)),
+    radial-gradient(circle at 20% 80%, rgba(75, 0, 130, 0.35) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(107, 31, 168, 0.25) 0%, transparent 50%),
+    linear-gradient(135deg, #000 0%, #070707 50%, #000 100%);
 }
 
 .landing-content {
@@ -493,9 +508,9 @@ onMounted(() => {
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* Centra horizontalmente el contenido dentro del panel */
   justify-content: center;
-  min-height: 90vh; /* Ajustado para el nuevo layout */
+  flex: 1; /* Ocupa el espacio vertical disponible */
 }
 
 .model-carousel-container {
@@ -608,11 +623,12 @@ onMounted(() => {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
+  justify-content: flex-start; /* Alinear botones a la izquierda */
 }
 
 .demo-section {
   padding: 100px 20px;
-  background: linear-gradient(180deg, transparent 0%, rgba(75, 0, 130, 0.05) 100%);
+  background: transparent;
 }
 
 .demo-container {
@@ -711,6 +727,25 @@ onMounted(() => {
    i {
      margin-right: 10px;
    }
+}
+
+/* Espaciado adicional entre modelo 3D y texto en escritorio */
+@media (min-width: 992px) {
+  .hero-section {
+    column-gap: 3rem; /* más separación entre columnas */
+  }
+  .model-panel {
+    padding-right: 2rem;
+  }
+
+  .text-panel {
+    padding-left: 8rem; /* desplazar más a la derecha */
+  }
+
+  /* Mover los botones más a la izquierda sin afectar el texto */
+  .landing-cta {
+    margin-left: -5.5rem;
+  }
 }
 
 @keyframes logoRotate {

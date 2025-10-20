@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Landing from "../views/Landing.vue";
 import Auth from "../views/Auth.vue";
 import Dashboard from "../views/Dashboard.vue";
+import DashboardV2 from "../views/DashboardV2.vue";
 import Empresas from "../views/Empresas.vue";
 import Categorias from "../views/Categorias.vue";
 import Productos from "../views/Productos.vue";
@@ -17,7 +18,8 @@ const router = createRouter({
     { path: "/", name: "landing", component: Landing },
     { path: "/auth", name: "auth", component: Auth },
 
-    { path: "/dashboard", name: "dashboard", component: Dashboard, meta: { requiresAuth: true } },
+    { path: "/dashboard", name: "dashboard", component: DashboardV2, meta: { requiresAuth: true, fullWidth: true } },
+    { path: "/dashboard-old", name: "dashboard-old", component: Dashboard, meta: { requiresAuth: true } },
     { path: "/empresas", name: "empresas", component: Empresas, meta: { requiresAuth: true } },
     { path: "/categorias", name: "categorias", component: Categorias, meta: { requiresAuth: true } },
     { path: "/productos", name: "productos", component: Productos, meta: { requiresAuth: true } },
@@ -37,10 +39,27 @@ export default router;
 
 // Simple auth guard based on localStorage token
 router.beforeEach((to, from, next) => {
+  if (to.name === 'auth') return next();
   if (to.meta?.requiresAuth) {
     let token = '';
-    try { token = localStorage.getItem('onoxfri_token') || ''; } catch {}
-    if (!token) return next({ name: 'auth' });
+    let expStr = '';
+    try {
+      token = localStorage.getItem('onoxfri_token') || '';
+      expStr = localStorage.getItem('onoxfri_token_exp') || '';
+    } catch {}
+
+    const now = Date.now();
+    const exp = Number(expStr || 0);
+    const isExpired = !exp || now > exp;
+
+    if (!token || isExpired) {
+      try {
+        localStorage.removeItem('onoxfri_token');
+        localStorage.removeItem('onoxfri_user');
+        localStorage.removeItem('onoxfri_token_exp');
+      } catch {}
+      return next({ name: 'auth' });
+    }
   }
   next();
 });

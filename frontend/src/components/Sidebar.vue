@@ -5,9 +5,6 @@
       <div class="logo-container">
         <img src="@/assets/img/l1.png" alt="ONOXFRI Logo" class="logo-img" />
       </div>
-      <div class="bot-container">
-        <img src="@/assets/img/bot.png" alt="Bot ONOXFRI" class="bot-img" />
-      </div>
       <div class="logo-subtitle">Inventario Inteligente</div>
     </div>
 
@@ -36,8 +33,8 @@
           <i class="fas fa-user"></i>
         </div>
         <div class="user-details-small">
-          <div class="user-name">{{ currentUser?.name || 'Usuario' }}</div>
-          <div class="user-role">{{ currentUserRole || 'Sin rol' }}</div>
+          <div class="user-name">{{ displayName }}</div>
+          <div class="user-role">{{ displayRole }}</div>
         </div>
       </div>
 
@@ -55,7 +52,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { authService } from '@/services/api.js'
+import apiClient from '@/apiClient'
 
 const router = useRouter()
 const route = useRoute()
@@ -70,43 +67,43 @@ const menuItems = ref([
     id: 'dashboard',
     label: 'Dashboard',
     route: '/dashboard',
-    icon: 'fas fa-tachometer-alt'
+    icon: 'bi bi-grid-1x2-fill'
   },
   {
     id: 'productos',
     label: 'Productos',
     route: '/productos',
-    icon: 'fas fa-boxes'
+    icon: 'bi bi-box-seam'
   },
   {
     id: 'categorias',
     label: 'Categorías',
     route: '/categorias',
-    icon: 'fas fa-tags'
+    icon: 'bi bi-tags'
   },
   {
     id: 'empresas',
     label: 'Empresas',
     route: '/empresas',
-    icon: 'fas fa-building'
+    icon: 'bi bi-building'
   },
   {
     id: 'inventario',
     label: 'Inventario',
     route: '/inventario',
-    icon: 'fas fa-warehouse'
+    icon: 'bi bi-clipboard-check'
   },
   {
     id: 'reportes',
     label: 'Reportes',
     route: '/reportes',
-    icon: 'fas fa-chart-bar'
+    icon: 'bi bi-graph-up'
   },
   {
     id: 'usuarios',
     label: 'Usuarios',
     route: '/usuarios',
-    icon: 'fas fa-users'
+    icon: 'bi bi-people'
   }
 ])
 
@@ -125,15 +122,73 @@ const goToSettings = () => {
   router.push('/configuracion')
 }
 
-const loadUserInfo = () => {
-  currentUser.value = authService.getCurrentUser()
-  // Aquí podrías cargar el rol del usuario desde la API
-  currentUserRole.value = 'Usuario' // Temporal
+const toTitle = (s) => s ? s.replace(/[_\-.]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s
+const emailPrefix = (e) => typeof e === 'string' && e.includes('@') ? e.split('@')[0] : ''
+const resolveName = (u) => {
+  const byField = u?.name || u?.username || u?.Nombre || u?.usuario
+  if (byField) return byField
+  const fromEmail = emailPrefix(u?.email)
+  return fromEmail ? toTitle(fromEmail) : null
+}
+const resolveRole = (u) => {
+  // soportar estructuras comunes: string, objeto, arrays
+  if (!u) return ''
+  if (typeof u.role === 'string') return u.role
+  if (typeof u.rol === 'string') return u.rol
+  if (u.role?.name) return u.role.name
+  if (u.rol?.name) return u.rol.name
+  if (Array.isArray(u.roles) && u.roles.length) return u.roles[0]?.name || u.roles[0]
+  return ''
+}
+
+const fetchUserFromApi = async () => {
+  const endpoints = [
+    import.meta.env.VITE_USER_ME_ENDPOINT || '/auth/me',
+    '/me'
+  ]
+  for (const ep of endpoints) {
+    try {
+      const { data } = await apiClient.get(ep)
+      if (data) return data.user || data.usuario || data
+    } catch (e) {
+      // siguiente endpoint
+    }
+  }
+  return null
+}
+
+const loadUserInfo = async () => {
+  // 1) intentar API
+  const apiUser = await fetchUserFromApi()
+  if (apiUser) {
+    currentUser.value = apiUser
+    currentUserRole.value = resolveRole(apiUser) || '—'
+    return
+  }
+  // 2) fallback localStorage
+  try {
+    const raw = localStorage.getItem('onoxfri_user')
+    const lsUser = raw ? JSON.parse(raw) : null
+    currentUser.value = lsUser
+    currentUserRole.value = resolveRole(lsUser) || localStorage.getItem('onoxfri_role') || '—'
+  } catch {
+    currentUser.value = null
+    currentUserRole.value = '—'
+  }
 }
 
 // Lifecycle
 onMounted(() => {
   loadUserInfo()
+})
+
+// Computed display values
+const displayName = computed(() => {
+  const n = resolveName(currentUser.value)
+  return n || '—'
+})
+const displayRole = computed(() => {
+  return currentUserRole.value || '—'
 })
 </script>
 

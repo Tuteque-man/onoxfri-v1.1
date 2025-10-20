@@ -6,41 +6,38 @@
      <!-- Layout principal estructurado (oculto en /auth) -->
     <div class="app-layout" v-if="!isAuth">
        <!-- Header con navegación de fotogramas -->
-       <header class="app-header" :class="{ 'no-sidebar': isLanding }">
-         <div class="header-content">
+       <header class="app-header" :class="{ 'no-sidebar': isLanding || isFullWidth }">
+         <div class="header-content" v-if="!isDashboard">
            <div class="header-left">
              <div class="app-logo">
                <img src="@/assets/img/l1.png" alt="ONOXFRI Logo" class="header-logo-img" />
                <span class="app-logo-text">ONOXFRI</span>
              </div>
            </div>
-
-          <div class="header-right">
-            <button class="theme-toggle-btn" @click="toggleTheme">
-              <i :class="currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'"></i>
-            </button>
-          </div>
         </div>
-      </header>
+       </header>
+ 
+       <!-- Contenido principal -->
+       <main class="app-main" :class="{ 'no-sidebar': isLanding || isFullWidth }">
+         <router-view />
+       </main>
 
-      <!-- Contenido principal - Fotograma activo -->
-      <main class="app-main" :class="{ 'no-sidebar': isLanding }">
-        <div class="frame-container">
-          <!-- Contenido del route activo -->
-          <div class="frame-content with-scroll">
-            <transition name="fade-slide" mode="out-in">
-              <router-view />
-            </transition>
-          </div>
-        </div>
-      </main>
+       <!-- Floating AI Assistant Button -->
+       <button class="ai-fab" type="button" aria-label="Asistente IA" @click="showAi = true">
+         <i class="fas fa-robot"></i>
+       </button>
+
+       <!-- AI Modal -->
+       <AIAssistantModal :visible="showAi" @close="showAi = false" />
     </div>
-
+ 
     <!-- Vista limpia para /auth (sin header/sidebar) -->
     <div v-else class="auth-route-container">
-      <transition name="fade-slide" mode="out-in">
-        <router-view />
-      </transition>
+      <router-view v-slot="{ Component }">
+        <transition name="fade-slide" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </div>
 
     <!-- Indicador de carga global -->
@@ -55,14 +52,18 @@
 <script setup>
  import { ref, computed, onMounted } from 'vue'
  import { useRoute } from 'vue-router'
+ import AIAssistantModal from '@/components/AIAssistantModal.vue'
 
  const isLoading = ref(false)
+ const showAi = ref(false)
 
  const route = useRoute()
  const routeMetaTitle = computed(() => route.meta?.title || '')
  const routeMetaDescription = computed(() => route.meta?.description || '')
- const isLanding = computed(() => route.name === 'Landing')
- const isAuth = computed(() => route.name === 'Auth')
+ const isLanding = computed(() => route.name === 'landing')
+ const isAuth = computed(() => route.name === 'auth')
+ const isFullWidth = computed(() => Boolean(route.meta?.fullWidth))
+ const isDashboard = computed(() => route.name === 'dashboard')
 
  const currentTheme = computed(() => {
    return localStorage.getItem('onoxfri_theme') || 'dark'
@@ -134,6 +135,19 @@
    }
  }
 
+/* Rejilla de fondo para Landing */
+.onoxfri-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(75,0,130,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  opacity: 0.3;
+  z-index: 1; /* Asegura que esté detrás del contenido */
+}
+
  /* Layout principal con sidebar */
  .app-layout {
   display: flex;
@@ -177,11 +191,6 @@
   backdrop-filter: blur(10px);
   border-bottom: 2px solid rgba(75, 0, 130, 0.3);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
-  margin-left: 280px;
-  transition: margin-left 0.3s ease;
-}
-
-.sidebar-collapsed .app-header {
   margin-left: 0;
 }
 
@@ -325,11 +334,8 @@
   margin-left: 0;
 }
 
-/* Quitar offset de sidebar en Landing */
+/* Quitar margen cuando no hay sidebar (ej. Landing page) */
 .app-main.no-sidebar {
-  margin-left: 0;
-}
-.app-header.no-sidebar {
   margin-left: 0;
 }
 
@@ -448,6 +454,7 @@
   .sidebar-collapsed .app-header {
     margin-left: 0;
   }
+  .app-header.no-sidebar { margin-left: 0 !important; }
 
   .header-content {
     padding: 1rem 1.5rem;
@@ -588,4 +595,27 @@
   --accent-primary: #4B0082;
   --accent-secondary: #6B1FA8;
 }
+
+/* Floating AI Assistant Button */
+.ai-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 1px solid rgba(138, 43, 226, 0.35);
+  background: linear-gradient(135deg, rgba(75,0,130,0.9), rgba(138,43,226,0.9));
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35), 0 0 15px rgba(138,43,226,0.35) inset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1200;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.ai-fab:hover { transform: translateY(-2px) scale(1.03); }
+.ai-fab:active { transform: translateY(0) scale(0.98); }
+.ai-fab i { font-size: 1.25rem; }
 </style>

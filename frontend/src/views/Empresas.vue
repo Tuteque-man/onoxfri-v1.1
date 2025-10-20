@@ -187,7 +187,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { empresaService } from '../services/api.js'
+import { empresaService } from '@/services'
 
 // Estado reactivo
 const empresas = ref([])
@@ -334,6 +334,7 @@ onMounted(() => {
 <style scoped>
 .empresas-container {
   min-height: 100vh;
+  width: 100%; /* Asegura que ocupe todo el ancho del contenedor padre */
 }
 
 .main-content {

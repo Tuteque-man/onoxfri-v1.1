@@ -7,12 +7,6 @@
           Reportes y Análisis
         </div>
       </div>
-      <div class="page-header">
-        <div class="page-title">
-          <i class="fas fa-chart-bar"></i>
-          Reportes y Análisis
-        </div>
-      </div>
 
       <div class="coming-soon">
         <i class="fas fa-construction"></i>

@@ -222,35 +222,7 @@
             {{ generalError }}
           </div>
         </form>
-
-        <!-- Toast notifications -->
-        <transition name="toast-fade">
-          <div v-if="toast.visible" :class="['toast', toast.type]" @click="toast.visible = false" role="status" aria-live="polite">
-            <i v-if="toast.type === 'success'" class="fas fa-check-circle"></i>
-            <i v-else-if="toast.type === 'error'" class="fas fa-exclamation-triangle"></i>
-            <span>{{ toast.text }}</span>
-          </div>
-        </transition>
-
       </div>
-  
-  <!-- Modal alerts (top-right, sin backdrop) as sibling of card -->
-  <transition name="modal-fade">
-    <div v-if="modal.visible" class="modal-fixed">
-      <div class="modal-card" role="dialog" aria-modal="true" :aria-label="modal.title || 'Mensaje'">
-        <div class="modal-header">
-          <i v-if="modal.type==='success'" class="fas fa-check-circle success"></i>
-          <i v-else-if="modal.type==='error'" class="fas fa-exclamation-triangle error"></i>
-          <span class="modal-title">{{ modal.title }}</span>
-          <button class="modal-close-x" type="button" @click="closeModal" aria-label="Cerrar">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">{{ modal.message }}</div>
-      </div>
-    </div>
-  </transition>
-
   </div>
 </template>
 
@@ -268,8 +240,6 @@ const isChangeMode = ref(false)
 const isLoading = ref(false)
 const successMessage = ref('')
 const generalError = ref('')
-const toast = reactive({ visible: false, text: '', type: 'info', timer: null })
-const modal = reactive({ visible: false, title: '', message: '', type: 'info', timer: null })
 
 // Formulario reactivo
 const form = reactive({
@@ -418,27 +388,6 @@ const validateForm = () => {
   return Object.keys(newErrors).length === 0
 }
 
-const showToast = (text, type = 'info', duration = 2500) => {
-  toast.text = text || ''
-  toast.type = type
-  toast.visible = true
-  if (toast.timer) clearTimeout(toast.timer)
-  toast.timer = setTimeout(() => { toast.visible = false; toast.timer = null }, duration)
-}
-
-const showModal = (message, type = 'info', title = '', duration = 2200) => {
-  modal.message = message || ''
-  modal.type = type
-  modal.title = title || (type === 'success' ? 'Éxito' : type === 'error' ? 'Error' : 'Mensaje')
-  modal.visible = true
-  if (modal.timer) clearTimeout(modal.timer)
-  modal.timer = setTimeout(() => { modal.visible = false; modal.timer = null }, duration)
-}
-
-const closeModal = () => {
-  modal.visible = false
-}
-
 const handleSubmit = async () => {
   if (!validateForm()) return
 
@@ -471,30 +420,17 @@ const handleSubmit = async () => {
       successMessage.value = isChangeMode.value
         ? '¡Contraseña actualizada correctamente!'
         : (isLoginMode.value ? '¡Inicio de sesión exitoso!' : '¡Cuenta creada exitosamente!')
-      showToast(successMessage.value, 'success')
-      showModal(successMessage.value, 'success', 'Operación exitosa')
-      try { sessionStorage.setItem('auth_notice', successMessage.value) } catch {}
       const role = response.user?.role || response.user?.rol || null
       if (!isChangeMode.value) {
         const target = role === 'almacen' || role === 'operador' ? '/inventario' : '/dashboard'
-        // Espera breve para que el usuario vea el toast y luego navega
-        setTimeout(() => router.push(target), 900)
+        router.push(target) // Usar la instancia de router definida en el setup
       }
     } else {
       generalError.value = response?.message || 'Error en la operación'
-      showToast(generalError.value, 'error')
-      showModal(generalError.value, 'error', 'Ocurrió un problema')
     }
   } catch (error) {
     console.error('[Auth] exception:', error)
-    const status = error?.response?.status
-    if (status === 401) {
-      generalError.value = 'Correo o contraseña inválidos'
-    } else {
-      generalError.value = error?.response?.data?.message || error.message || 'Error inesperado'
-    }
-    showToast(generalError.value, 'error')
-    showModal(generalError.value, 'error', 'Ocurrió un problema')
+    generalError.value = error.message || 'Error inesperado'
   } finally {
     isLoading.value = false
   }
@@ -512,18 +448,11 @@ const resetPassword = async () => {
     const resp = await authService.requestPasswordReset({ email: form.email })
     if (resp?.success) {
       successMessage.value = resp?.message || 'Te enviamos un correo con instrucciones para restablecer tu contraseña.'
-      showToast(successMessage.value, 'success')
-      showModal(successMessage.value, 'success', 'Recuperación de contraseña')
-      router.push('/login')
     } else {
       generalError.value = resp?.message || 'No se pudo iniciar el proceso de recuperación'
-      showToast(generalError.value, 'error')
-      showModal(generalError.value, 'error', 'Recuperación de contraseña')
     }
   } catch (e) {
     generalError.value = e?.message || 'Error al solicitar recuperación de contraseña'
-    showToast(generalError.value, 'error')
-    showModal(generalError.value, 'error', 'Recuperación de contraseña')
   } finally {
     isLoading.value = false
   }
@@ -1076,51 +1005,6 @@ input:checked ~ .slider .register-text {
   margin-bottom: 0;
   padding-top: 0;
   padding-bottom: 0;
-}
-
-/* Modal styles */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-}
-.modal-card {
-  width: min(92vw, 420px);
-  background: #12011f;
-  border: 1px solid rgba(138, 43, 226, 0.35);
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  padding: 1rem 1rem 0.9rem;
-}
-.modal-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-.modal-title { color: #fff; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
-.modal-header .success { color: #3bd16f; }
-.modal-header .error { color: #ff667a; }
-.modal-header .modal-close-x { margin-left: auto; background: transparent; border: none; color: #eae3f7; cursor: pointer; padding: 0.25rem; border-radius: 6px; }
-.modal-header .modal-close-x:hover { background: rgba(255,255,255,0.06); }
-.modal-body { color: #eae3f7; margin: 0.25rem 0 0.75rem; line-height: 1.4; }
-
-/* Modal transition */
-.modal-fade-enter-active,
-.modal-fade-leave-active { transition: opacity 0.18s ease; }
-.modal-fade-enter-from,
-.modal-fade-leave-to { opacity: 0; }
-
-/* Top-right fixed container for modal */
-.modal-fixed {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 10000;
 }
 
 /* Responsive */

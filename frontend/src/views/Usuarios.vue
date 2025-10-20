@@ -7,12 +7,6 @@
           Gestión de Usuarios
         </div>
       </div>
-      <div class="page-header">
-        <div class="page-title">
-          <i class="fas fa-users"></i>
-          Gestión de Usuarios
-        </div>
-      </div>
 
       <div class="coming-soon">
         <i class="fas fa-construction"></i>

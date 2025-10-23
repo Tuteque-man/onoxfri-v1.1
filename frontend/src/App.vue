@@ -23,12 +23,15 @@
        </main>
 
        <!-- Floating AI Assistant Button -->
-       <button class="ai-fab" type="button" aria-label="Asistente IA" @click="showAi = true">
-         <i class="fas fa-robot"></i>
-       </button>
-
-       <!-- AI Modal -->
-       <AIAssistantModal :visible="showAi" @close="showAi = false" />
+       <template v-if="isDashboard">
+         <button class="ai-fab" type="button" aria-label="Asistente IA" @click="showAi = true">
+           <i class="fas fa-robot"></i>
+         </button>
+         <!-- AI Modal -->
+         <AIAssistantModal :visible="showAi" @close="showAi = false" />
+       </template>
+       <!-- Downbar móvil -->
+       <Downbar />
     </div>
  
     <!-- Vista limpia para /auth (sin header/sidebar) -->
@@ -53,6 +56,7 @@
  import { ref, computed, onMounted } from 'vue'
  import { useRoute } from 'vue-router'
  import AIAssistantModal from '@/components/AIAssistantModal.vue'
+ import Downbar from '@/components/Downbar.vue'
 
  const isLoading = ref(false)
  const showAi = ref(false)
@@ -475,6 +479,13 @@
     margin-left: 0;
   }
 
+  /* Evitar que la downbar tape el contenido en móviles */
+  .app-main {
+    padding-bottom: 72px; /* downbar height + margen */
+    width: 100vw; /* ocupar todo el ancho del viewport */
+    margin: 0; /* sin márgenes laterales */
+  }
+
   .header-content {
     padding: 1rem;
   }
@@ -618,4 +629,12 @@
 .ai-fab:hover { transform: translateY(-2px) scale(1.03); }
 .ai-fab:active { transform: translateY(0) scale(0.98); }
 .ai-fab i { font-size: 1.25rem; }
+
+  /* Subir FAB en móviles para no chocar con Downbar */
+  @media (max-width: 992px) {
+    .ai-fab {
+      right: 16px;
+      bottom: calc(92px + env(safe-area-inset-bottom)); /* ~60px downbar + margen */
+    }
+  }
 </style>

@@ -134,24 +134,29 @@ const resolveRole = (u) => {
   // soportar estructuras comunes: string, objeto, arrays
   if (!u) return ''
   if (typeof u.role === 'string') return u.role
+  if (typeof u.role_name === 'string') return u.role_name
   if (typeof u.rol === 'string') return u.rol
   if (u.role?.name) return u.role.name
   if (u.rol?.name) return u.rol.name
   if (Array.isArray(u.roles) && u.roles.length) return u.roles[0]?.name || u.roles[0]
+  if (u.role_id != null) {
+    const id = Number(u.role_id)
+    if (id === 1) return 'Superusuario'
+    if (id === 2) return 'Gerente'
+    if (id === 3) return 'Asistente'
+  }
   return ''
 }
 
 const fetchUserFromApi = async () => {
-  const endpoints = [
-    import.meta.env.VITE_USER_ME_ENDPOINT || '/auth/me',
-    '/me'
-  ]
-  for (const ep of endpoints) {
+  const ep = import.meta.env.VITE_USER_ME_ENDPOINT
+  // Solo intenta si está definido explícitamente en el entorno
+  if (ep && typeof ep === 'string' && ep.trim() !== '') {
     try {
       const { data } = await apiClient.get(ep)
       if (data) return data.user || data.usuario || data
     } catch (e) {
-      // siguiente endpoint
+      // ignorar y usar fallback localStorage
     }
   }
   return null
@@ -188,7 +193,19 @@ const displayName = computed(() => {
   return n || '—'
 })
 const displayRole = computed(() => {
-  return currentUserRole.value || '—'
+  // calcular dinámicamente desde currentUser; fallback al estado previo o localStorage
+  const dyn = resolveRole(currentUser.value)
+  if (dyn) return dyn
+  if (currentUserRole.value) return currentUserRole.value
+  try {
+    const stored = localStorage.getItem('onoxfri_role')
+    if (stored) return stored
+  } catch {}
+  return '—'
+})
+const displayCompany = computed(() => {
+  const c = currentUser.value?.empresa_nombre || currentUser.value?.company || currentUser.value?.empresa || ''
+  return c || '—'
 })
 </script>
 
@@ -285,6 +302,26 @@ const displayRole = computed(() => {
     margin-bottom: 0.5rem;
     opacity: 0;
     animation: slideInLeft 0.5s ease-out forwards;
+
+    .user-under-users {
+      margin: 6px 0 10px 44px; /* alineado al texto de enlaces (icono 20px + gap) */
+      display: grid;
+      gap: 4px;
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: rgba(255,255,255,0.8);
+        font-size: 0.78rem;
+        .txt { 
+          overflow: hidden; 
+          text-overflow: ellipsis; 
+          white-space: nowrap; 
+          max-width: 180px;
+        }
+        i { font-size: 0.9rem; width: 16px; text-align: center; color: rgba(255,255,255,0.85); }
+      }
+    }
 
     .nav-link {
       display: flex;

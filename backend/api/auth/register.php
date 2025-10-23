@@ -20,70 +20,67 @@ try {
     $nombre_usuario = trim($input['nombre_usuario'] ?? '');
     $nombre_empresa = trim($input['nombre_empresa'] ?? '');
 
-    if (!$email || !$password || !$roleId || !$nombre || !$apellido || !$nombre_usuario || !$nombre_empresa) {
+    if (!$email || !$password || !$roleId || !$nombre || !$apellido || !$nombre_empresa) {
         json_response(['success' => false, 'message' => 'Faltan campos requeridos'], 400);
     }
 
     $pdo = db();
     $pdo->beginTransaction();
 
-    // 1) Crear o recuperar empresa por nombre (UNIQUE)
-    $stmt = $pdo->prepare('SELECT id FROM empresas WHERE nombre_empresa = ?');
-    $stmt->execute([$nombre_empresa]);
-    $empresa = $stmt->fetch();
-
-    if (!$empresa) {
-        $stmt = $pdo->prepare('INSERT INTO empresas (nombre_empresa) VALUES (?)');
-        $stmt->execute([$nombre_empresa]);
-        $empresa_id = (int)$pdo->lastInsertId();
-    } else {
-        $empresa_id = (int)$empresa['id'];
-    }
-
-    // 2) Asegurar que la empresa tenga el roleId en empresa_roles (máx 3 via trigger)
-    $stmt = $pdo->prepare('SELECT 1 FROM empresa_roles WHERE empresa_id = ? AND role_id = ?');
-    $stmt->execute([$empresa_id, $roleId]);
-    if (!$stmt->fetch()) {
-        // Esto puede fallar si ya hay 3 roles (trigger lo controla)
-        $stmtIns = $pdo->prepare('INSERT INTO empresa_roles (empresa_id, role_id) VALUES (?, ?)');
-        $stmtIns->execute([$empresa_id, $roleId]);
-    }
-
-    // 3) Validaciones de unicidad
-    // email
+    // 1) Validaciones
+    // email único
     $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
     $stmt->execute([$email]);
     if ($stmt->fetch()) {
         $pdo->rollBack();
         json_response(['success' => false, 'message' => 'El email ya está registrado'], 409);
     }
-    // nombre_usuario
-    $stmt = $pdo->prepare('SELECT id FROM users WHERE nombre_usuario = ?');
-    $stmt->execute([$nombre_usuario]);
-    if ($stmt->fetch()) {
-        $pdo->rollBack();
-        json_response(['success' => false, 'message' => 'El nombre de usuario ya está registrado'], 409);
-    }
-    // 1 usuario por (empresa, rol)
-    $stmt = $pdo->prepare('SELECT id FROM users WHERE empresa_id = ? AND role_id = ?');
-    $stmt->execute([$empresa_id, $roleId]);
-    if ($stmt->fetch()) {
-        $pdo->rollBack();
-        json_response(['success' => false, 'message' => 'Ese rol ya tiene un usuario en esta empresa'], 409);
-    }
-
-    // 4) Insert usuario
-    $hash = password_hash($password, PASSWORD_BCRYPT);
-    $stmt = $pdo->prepare('INSERT INTO users (email, nombre_empresa, nombre, apellido, nombre_usuario, empresa_id, role_id, password_hash, is_active)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)');
-    $stmt->execute([$email, $nombre_empresa, $nombre, $apellido, $nombre_usuario, $empresa_id, $roleId, $hash]);
-    $user_id = (int)$pdo->lastInsertId();
-
-    // 5) Obtener nombre del rol
+    // rol válido
     $stmt = $pdo->prepare('SELECT name FROM roles WHERE id = ?');
     $stmt->execute([$roleId]);
     $roleRow = $stmt->fetch();
-    $roleName = $roleRow ? $roleRow['name'] : null;
+    if (!$roleRow) {
+        $pdo->rollBack();
+        json_response(['success' => false, 'message' => 'Rol inválido'], 400);
+    }
+
+    // 2) Crear usuario
+    $hash = password_hash($password, PASSWORD_BCRYPT);
+    $fullName = trim($nombre . ' ' . $apellido);
+    if ($fullName === '') { $fullName = $nombre ?: $apellido; }
+    // Detectar si la columna 'name' existe en la tabla users
+    $colStmt = $pdo->prepare('SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?');
+    $colStmt->execute([DB_NAME, 'users', 'name']);
+    $hasNameColumn = (bool)$colStmt->fetchColumn();
+
+    if ($hasNameColumn) {
+        $stmt = $pdo->prepare('INSERT INTO users (name, email, password_hash, is_active) VALUES (?, ?, ?, 1)');
+        $stmt->execute([$fullName, $email, $hash]);
+    } else {
+        $stmt = $pdo->prepare('INSERT INTO users (email, password_hash, is_active) VALUES (?, ?, 1)');
+        $stmt->execute([$email, $hash]);
+    }
+    $user_id = (int)$pdo->lastInsertId();
+
+    // 3) Crear empresa y asociarla al usuario como propietario (usuario_id)
+    // Detectar si la columna empresas.usuario_id existe
+    $colStmt2 = $pdo->prepare('SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?');
+    $colStmt2->execute([DB_NAME, 'empresas', 'usuario_id']);
+    $hasUsuarioIdInEmpresas = (bool)$colStmt2->fetchColumn();
+
+    if ($hasUsuarioIdInEmpresas) {
+        $stmt = $pdo->prepare('INSERT INTO empresas (nombre_empresa, descripcion, usuario_id, fecha_creacion) VALUES (?, NULL, ?, NOW())');
+        $stmt->execute([$nombre_empresa, $user_id]);
+    } else {
+        // Insert sin relacion directa; se puede enlazar luego por otra vía
+        $stmt = $pdo->prepare('INSERT INTO empresas (nombre_empresa, descripcion) VALUES (?, NULL)');
+        $stmt->execute([$nombre_empresa]);
+    }
+    $empresa_id = (int)$pdo->lastInsertId();
+
+    // 4) Asignar rol al usuario
+    $stmt = $pdo->prepare('INSERT INTO user_roles (user_id, role_id, assigned_at) VALUES (?, ?, NOW())');
+    $stmt->execute([$user_id, $roleId]);
 
     $pdo->commit();
 
@@ -91,12 +88,15 @@ try {
     $user = [
         'id' => $user_id,
         'email' => $email,
-        'role' => $roleName,
+        'role' => $roleRow['name'],
         'role_id' => $roleId,
         'empresa_id' => $empresa_id,
+        'empresa_nombre' => $nombre_empresa,
+        'name' => $hasNameColumn ? $fullName : (strpos($email, '@') !== false ? substr($email, 0, strpos($email, '@')) : $email),
+        // Campos del formulario devueltos por compatibilidad
         'nombre' => $nombre,
         'apellido' => $apellido,
-        'nombre_usuario' => $nombre_usuario,
+        'nombre_usuario' => $nombre_usuario ?: null,
     ];
 
     json_response(['success' => true, 'token' => $token, 'user' => $user]);

@@ -20,10 +20,23 @@ try {
 
     $pdo = db();
 
-    $stmt = $pdo->prepare('SELECT u.id, u.email, u.password_hash, u.is_active, u.role_id, u.empresa_id, u.nombre, u.apellido, u.nombre_usuario, r.name AS role_name
-                           FROM users u
-                           JOIN roles r ON r.id = u.role_id
-                           WHERE u.email = ? LIMIT 1');
+    $stmt = $pdo->prepare(
+        'SELECT 
+            u.id, u.email, u.password_hash, u.is_active,
+            ur.role_id, r.name AS role_name,
+            e.id AS empresa_id, e.nombre_empresa AS empresa_nombre
+         FROM users u
+         LEFT JOIN user_roles ur ON ur.user_id = u.id
+         LEFT JOIN roles r ON r.id = ur.role_id
+         LEFT JOIN (
+            SELECT usuario_id, MAX(id) AS empresa_id
+            FROM empresas
+            GROUP BY usuario_id
+         ) ue ON ue.usuario_id = u.id
+         LEFT JOIN empresas e ON e.id = ue.empresa_id
+         WHERE u.email = ?
+         LIMIT 1'
+    );
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
@@ -45,11 +58,11 @@ try {
         'id' => (int)$user['id'],
         'email' => $user['email'],
         'role' => $user['role_name'],
-        'role_id' => (int)$user['role_id'],
-        'empresa_id' => (int)$user['empresa_id'],
-        'nombre' => $user['nombre'],
-        'apellido' => $user['apellido'],
-        'nombre_usuario' => $user['nombre_usuario'],
+        'role_name' => $user['role_name'],
+        'role_id' => isset($user['role_id']) ? (int)$user['role_id'] : null,
+        'empresa_id' => isset($user['empresa_id']) ? (int)$user['empresa_id'] : null,
+        'empresa_nombre' => isset($user['empresa_nombre']) ? $user['empresa_nombre'] : null,
+        'name' => isset($user['name']) && $user['name'] ? $user['name'] : (strpos($user['email'], '@') !== false ? substr($user['email'], 0, strpos($user['email'], '@')) : $user['email']),
     ];
 
     json_response(['success' => true, 'token' => $token, 'user' => $respUser]);
@@ -58,3 +71,4 @@ try {
 } catch (Throwable $e) {
     json_response(['success' => false, 'message' => $e->getMessage()], 500);
 }
+

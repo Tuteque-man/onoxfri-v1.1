@@ -45,6 +45,24 @@
 
       <!-- Gráficos y widgets -->
       <div class="dashboard-widgets">
+        <!-- Información del usuario autenticado -->
+        <div class="widget-card" v-if="currentUser">
+          <div class="widget-header">
+            <h3 class="widget-title">
+              <i class="fas fa-user-circle"></i>
+              Tu Sesión
+            </h3>
+          </div>
+          <div class="widget-content">
+            <div class="user-grid">
+              <div class="user-field"><strong>Nombre:</strong> <span>{{ currentUser.name || currentUser.nombre || '—' }}</span></div>
+              <div class="user-field"><strong>Email:</strong> <span>{{ currentUser.email }}</span></div>
+              <div class="user-field"><strong>Rol:</strong> <span>{{ currentUser.role }} <span v-if="currentUser.role_id">(#{{ currentUser.role_id }})</span></span></div>
+              <div class="user-field"><strong>Empresa ID:</strong> <span>{{ currentUser.empresa_id ?? '—' }}</span></div>
+            </div>
+          </div>
+        </div>
+
         <!-- Gráfico de productos por categoría -->
         <div class="widget-card">
           <div class="widget-header">
@@ -197,6 +215,8 @@ const recentActivity = ref([
   }
 ])
 
+const currentUser = ref(null)
+
 // Datos simulados para demostración
 const loadDashboardData = () => {
   // Datos simulados para demostración
@@ -231,6 +251,10 @@ const refreshData = () => {
 // Lifecycle
 onMounted(() => {
   loadDashboardData()
+  try {
+    const raw = localStorage.getItem('onoxfri_user')
+    if (raw) currentUser.value = JSON.parse(raw)
+  } catch {}
   try {
     const msg = sessionStorage.getItem('auth_notice')
     if (msg) {
@@ -442,6 +466,22 @@ onMounted(() => {
       margin: 0;
       font-size: 0.875rem;
     }
+  }
+
+  /* User info grid */
+  .user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .user-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(75, 0, 130, 0.2);
+    background: rgba(75, 0, 130, 0.06);
   }
 
   .alerts-list {

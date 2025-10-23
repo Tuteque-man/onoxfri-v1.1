@@ -10,8 +10,22 @@ export const authService = {
   async login(credentials) {
     const response = await apiClient.post('/auth/login.php', credentials);
     if (response.data.token) {
+      // Merge empresa_nombre if backend didn't send it but we have one stored from a previous session (e.g., after register)
+      try {
+        const prevRaw = localStorage.getItem('onoxfri_user');
+        const prev = prevRaw ? JSON.parse(prevRaw) : null;
+        if (prev && !response.data.user?.empresa_nombre && prev.empresa_nombre) {
+          response.data.user.empresa_nombre = prev.empresa_nombre;
+        }
+      } catch {}
+
       localStorage.setItem('onoxfri_token', response.data.token);
       localStorage.setItem('onoxfri_user', JSON.stringify(response.data.user));
+      // Guardar rol plano para UI
+      try {
+        const rolePlain = response.data.user?.role || response.data.user?.role_name || '';
+        if (rolePlain) localStorage.setItem('onoxfri_role', rolePlain);
+      } catch {}
       // Expiración local: 20 minutos
       const expiresAt = Date.now() + 20 * 60 * 1000;
       localStorage.setItem('onoxfri_token_exp', String(expiresAt));
@@ -25,6 +39,16 @@ export const authService = {
    */
   async register(payload) {
     const response = await apiClient.post('/auth/register.php', payload);
+    if (response.data.token) {
+      localStorage.setItem('onoxfri_token', response.data.token);
+      localStorage.setItem('onoxfri_user', JSON.stringify(response.data.user));
+      try {
+        const rolePlain = response.data.user?.role || response.data.user?.role_name || '';
+        if (rolePlain) localStorage.setItem('onoxfri_role', rolePlain);
+      } catch {}
+      const expiresAt = Date.now() + 20 * 60 * 1000;
+      localStorage.setItem('onoxfri_token_exp', String(expiresAt));
+    }
     return response.data;
   },
 

@@ -151,18 +151,26 @@
             <label :for="isLoginMode ? 'login_password' : 'register_password'">
               Contraseña *
             </label>
-            <div class="input-group">
+            <div class="input-group password-group">
               <span class="input-icon"><i class="fas fa-lock"></i></span>
               <input
                 :id="isLoginMode ? 'login_password' : 'register_password'"
                 :name="isLoginMode ? 'login_password' : 'register_password'"
                 v-model="form.password"
-                type="password"
+                :type="showPassword ? 'text' : 'password'"
                 class="form-input"
                 :class="{ 'error': errors.password }"
                 :placeholder="isLoginMode ? 'Ingrese su contraseña' : 'Mínimo 6 caracteres'"
                 @input="clearError('password')"
               >
+              <button 
+                type="button" 
+                class="toggle-password" 
+                @click="showPassword = !showPassword"
+                tabindex="-1"
+              >
+                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
             </div>
             <div v-if="errors.password" class="error-message">
               {{ errors.password }}
@@ -173,18 +181,26 @@
           <transition name="form-field">
             <div v-if="!isLoginMode" class="form-group" key="confirm_password">
               <label for="confirm_password">Confirmar Contraseña *</label>
-              <div class="input-group">
+              <div class="input-group password-group">
                 <span class="input-icon"><i class="fas fa-check-double"></i></span>
                 <input
                   id="confirm_password"
                   name="confirm_password"
                   v-model="form.confirmPassword"
-                  type="password"
+                  :type="showConfirmPassword ? 'text' : 'password'"
                   class="form-input"
                   :class="{ 'error': errors.confirmPassword }"
                   placeholder="Repita su contraseña"
                   @input="clearError('confirmPassword')"
                 >
+                <button 
+                  type="button" 
+                  class="toggle-password" 
+                  @click="showConfirmPassword = !showConfirmPassword"
+                  tabindex="-1"
+                >
+                  <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </button>
               </div>
               <div v-if="errors.confirmPassword" class="error-message">{{ errors.confirmPassword }}</div>
             </div>
@@ -268,6 +284,8 @@ const isChangeMode = ref(false)
 const isLoading = ref(false)
 const successMessage = ref('')
 const generalError = ref('')
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 const toast = reactive({ visible: false, text: '', type: 'info', timer: null })
 const modal = reactive({ visible: false, title: '', message: '', type: 'info', timer: null })
 
@@ -474,11 +492,21 @@ const handleSubmit = async () => {
       showToast(successMessage.value, 'success')
       showModal(successMessage.value, 'success', 'Operación exitosa')
       try { sessionStorage.setItem('auth_notice', successMessage.value) } catch {}
-      const role = response.user?.role || response.user?.rol || null
-      if (!isChangeMode.value) {
+      
+      if (isChangeMode.value) {
+        // No hacer nada si es cambio de contraseña
+      } else if (isLoginMode.value) {
+        // Login exitoso - redirigir al dashboard
+        const role = response.user?.role || response.user?.rol || null
         const target = role === 'almacen' || role === 'operador' ? '/inventario' : '/dashboard'
-        // Espera breve para que el usuario vea el toast y luego navega
         setTimeout(() => router.push(target), 900)
+      } else {
+        // Registro exitoso - cambiar a modo login
+        setTimeout(() => {
+          activateLogin()
+          form.password = '' // Limpiar contraseña por seguridad
+          showToast('Ahora puedes iniciar sesión con tu cuenta', 'info')
+        }, 1500)
       }
     } else {
       generalError.value = response?.message || 'Error en la operación'
@@ -707,7 +735,7 @@ watch(() => form.apellido, (val) => {
 .tab-btn.active {
   background: linear-gradient(135deg, #4B0082, #6B1FA8);
   border-color: transparent;
-  box-shadow: 0 0 18px rgba(75, 0, 130, 0.25);
+  box-shadow: 0 0 18px rgba(138, 43, 226, 0.25);
 }
 
 .auth-logo-img {
@@ -795,8 +823,13 @@ input:checked + .slider:before {
   color: #ccc;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 600;
-  z-index: 1;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   transition: color 0.4s ease;
+  z-index: 1;
 }
 
 input:checked ~ .slider .login-text,
@@ -876,6 +909,40 @@ input:checked ~ .slider .register-text {
 /* When using input-group (flex icon), remove extra left padding */
 .input-group > .form-input {
   padding-left: 1rem;
+}
+
+/* Password toggle button */
+.password-group {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: rgba(138, 43, 226, 0.75);
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+  z-index: 10;
+}
+
+.toggle-password:hover {
+  color: #C77DFF;
+}
+
+.toggle-password i {
+  font-size: 1rem;
+}
+
+.password-group .form-input {
+  padding-right: 3rem;
 }
 
 /* Placeholders en morado (acento) */

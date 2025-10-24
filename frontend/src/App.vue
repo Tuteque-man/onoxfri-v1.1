@@ -7,7 +7,7 @@
     <div class="app-layout" v-if="!isAuth">
        <!-- Header con navegación de fotogramas -->
        <header class="app-header" :class="{ 'no-sidebar': isLanding || isFullWidth }">
-         <div class="header-content" v-if="!isDashboard">
+         <div class="header-content" v-if="isLanding">
            <div class="header-left">
              <div class="app-logo">
                <img src="@/assets/img/l1.png" alt="ONOXFRI Logo" class="header-logo-img" />
@@ -31,7 +31,7 @@
          <AIAssistantModal :visible="showAi" @close="showAi = false" />
        </template>
        <!-- Downbar móvil -->
-       <Downbar />
+       <Downbar v-if="!isLanding" />
     </div>
  
     <!-- Vista limpia para /auth (sin header/sidebar) -->
@@ -99,7 +99,7 @@
    padding: 0;
    width: 100%;
    height: 100%;
-   overflow-x: hidden;
+   overflow: hidden;
    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
    background: #000;
  }
@@ -108,9 +108,10 @@
  .onoxfri-container {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   background: #000;
   z-index: 1;
+  overflow: hidden;
  }
 
  /* Fondo matrix animado */
@@ -157,11 +158,12 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   position: relative;
   margin: 0;
   padding: 0;
   z-index: 2;
+  overflow: hidden;
 }
 
 /* =====================================================
@@ -321,12 +323,11 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-left: 280px;
-  min-height: 100vh;
-  height: auto;
+  margin-left: 0;
+  height: 100vh;
   position: relative;
   transition: margin-left 0.3s ease;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .sidebar-collapsed .app-main {
@@ -424,6 +425,14 @@
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* Vista limpia para /auth */
+.auth-route-container {
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
   /* Transición suave entre rutas */

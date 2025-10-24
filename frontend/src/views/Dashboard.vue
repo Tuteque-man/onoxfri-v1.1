@@ -200,18 +200,33 @@ const categoriaData = ref([])
 const recentActivity = ref([
   {
     icon: 'fas fa-plus-circle',
-    text: 'Nuevo producto agregado',
-    time: 'Hace 2 horas'
+    text: 'Nuevo producto agregado: Laptop Dell Inspiron 15',
+    time: 'Hace 15 minutos'
+  },
+  {
+    icon: 'fas fa-exclamation-triangle',
+    text: 'Alerta: Stock bajo en Teclado Mecánico RGB',
+    time: 'Hace 1 hora'
   },
   {
     icon: 'fas fa-edit',
-    text: 'Producto actualizado',
-    time: 'Hace 4 horas'
+    text: 'Actualización de precio: Monitor Samsung 27"',
+    time: 'Hace 2 horas'
   },
   {
-    icon: 'fas fa-minus-circle',
-    text: 'Stock reducido',
-    time: 'Hace 6 horas'
+    icon: 'fas fa-box',
+    text: 'Pedido recibido: 50 unidades de Mouse Logitech',
+    time: 'Hace 3 horas'
+  },
+  {
+    icon: 'fas fa-user-plus',
+    text: 'Nuevo usuario registrado: Carlos López',
+    time: 'Hace 5 horas'
+  },
+  {
+    icon: 'fas fa-chart-line',
+    text: 'Reporte mensual generado exitosamente',
+    time: 'Hace 8 horas'
   }
 ])
 
@@ -220,22 +235,28 @@ const currentUser = ref(null)
 // Datos simulados para demostración
 const loadDashboardData = () => {
   // Datos simulados para demostración
-  stats.totalProductos = 45
-  stats.stockBajo = 3
-  stats.totalEmpresas = 2
-  stats.valorInventario = '$12,450'
+  stats.totalProductos = 127
+  stats.stockBajo = 8
+  stats.totalEmpresas = 1
+  stats.valorInventario = '$45,780'
 
   productosStockBajo.value = [
-    { id: 1, name: 'Producto A', stock_actual: 2, min_stock: 5 },
-    { id: 2, name: 'Producto B', stock_actual: 1, min_stock: 3 },
-    { id: 3, name: 'Producto C', stock_actual: 0, min_stock: 2 }
+    { id: 1, name: 'Laptop Dell Inspiron 15', stock_actual: 2, min_stock: 5 },
+    { id: 2, name: 'Mouse Logitech MX Master', stock_actual: 1, min_stock: 10 },
+    { id: 3, name: 'Teclado Mecánico RGB', stock_actual: 0, min_stock: 8 },
+    { id: 4, name: 'Monitor Samsung 27"', stock_actual: 3, min_stock: 6 },
+    { id: 5, name: 'Webcam HD 1080p', stock_actual: 1, min_stock: 4 },
+    { id: 6, name: 'Auriculares Bluetooth', stock_actual: 2, min_stock: 12 },
+    { id: 7, name: 'Cable HDMI 2m', stock_actual: 4, min_stock: 15 },
+    { id: 8, name: 'Hub USB-C 7 puertos', stock_actual: 0, min_stock: 5 }
   ]
 
   categoriaData.value = [
-    { categoria: 'Electrónicos', cantidad: 25 },
-    { categoria: 'Ropa', cantidad: 18 },
-    { categoria: 'Libros', cantidad: 12 },
-    { categoria: 'Otros', cantidad: 8 }
+    { categoria: 'Electrónica', cantidad: 45 },
+    { categoria: 'Accesorios', cantidad: 32 },
+    { categoria: 'Periféricos', cantidad: 28 },
+    { categoria: 'Audio', cantidad: 15 },
+    { categoria: 'Cables', cantidad: 7 }
   ]
 }
 

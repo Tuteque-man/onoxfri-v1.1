@@ -45,6 +45,36 @@
         <i class="fas fa-cog"></i>
         Configuración
       </button>
+      
+      <button
+        class="btn-logout"
+        @click="showLogoutModal = true"
+      >
+        <i class="bi bi-box-arrow-right"></i>
+        Cerrar Sesión
+      </button>
+    </div>
+
+    <!-- Modal de Confirmación de Cierre de Sesión -->
+    <div v-if="showLogoutModal" class="modal-overlay" @click="showLogoutModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <i class="bi bi-exclamation-triangle"></i>
+          <h3>Cerrar Sesión</h3>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro que deseas cerrar sesión?</p>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-cancel" @click="showLogoutModal = false" :disabled="isLoggingOut">
+            Cancelar
+          </button>
+          <button class="btn-confirm" @click="handleLogout" :disabled="isLoggingOut">
+            <span v-if="!isLoggingOut">Cerrar Sesión</span>
+            <span v-else><i class="bi bi-arrow-repeat spin"></i> Cerrando...</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -60,6 +90,8 @@ const route = useRoute()
 // Estado reactivo
 const currentUser = ref(null)
 const currentUserRole = ref('')
+const showLogoutModal = ref(false)
+const isLoggingOut = ref(false)
 
 // Elementos del menú
 const menuItems = ref([
@@ -120,6 +152,46 @@ const handleNavClick = () => {
 
 const goToSettings = () => {
   router.push('/configuracion')
+}
+
+const handleLogout = async () => {
+  isLoggingOut.value = true
+  
+  try {
+    // Llamar a la API de logout
+    const logoutEndpoint = import.meta.env.VITE_LOGOUT_ENDPOINT || '/api/logout'
+    
+    try {
+      await apiClient.post(logoutEndpoint)
+    } catch (apiError) {
+      console.warn('Error al llamar API de logout:', apiError)
+      // Continuar con el logout local aunque falle la API
+    }
+    
+    // Limpiar localStorage
+    localStorage.removeItem('onoxfri_token')
+    localStorage.removeItem('onoxfri_user')
+    localStorage.removeItem('onoxfri_role')
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+    
+    // Limpiar sessionStorage
+    sessionStorage.clear()
+    
+    // Cerrar modal
+    showLogoutModal.value = false
+    
+    // Redirigir a la página principal
+    await router.push('/')
+    
+    // Recargar la página para limpiar el estado de la aplicación
+    window.location.reload()
+  } catch (error) {
+    console.error('Error durante el logout:', error)
+    alert('Ocurrió un error al cerrar sesión. Por favor, intenta nuevamente.')
+  } finally {
+    isLoggingOut.value = false
+  }
 }
 
 const toTitle = (s) => s ? s.replace(/[_\-.]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : s
@@ -222,8 +294,45 @@ const displayCompany = computed(() => {
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  
+  /* Scrollbar invisible por defecto */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+  }
+  
+  /* Mostrar scrollbar al hacer hover */
+  &:hover {
+    scrollbar-color: rgba(138, 43, 226, 0.5) rgba(255, 255, 255, 0.05);
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(138, 43, 226, 0.6), rgba(189, 147, 255, 0.4));
+      
+      &:hover {
+        background: linear-gradient(180deg, rgba(138, 43, 226, 0.8), rgba(189, 147, 255, 0.6));
+      }
+    }
+  }
 
   &::before {
     content: '';
@@ -451,10 +560,146 @@ const displayCompany = computed(() => {
     padding: 0.75rem;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 0.5rem;
 
     &:hover {
       background: rgba(255, 255, 255, 0.2);
       border-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  .btn-logout {
+    width: 100%;
+    font-size: 0.75rem;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    border: 1px solid rgba(220, 38, 38, 0.5);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+
+    i {
+      font-size: 1rem;
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, #991b1b, #7f1d1d);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Modal de Logout */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: linear-gradient(180deg, rgba(18,0,30,0.95), rgba(10,0,20,0.95));
+  border: 2px solid rgba(138,43,226,0.5);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(138,43,226,0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  i {
+    font-size: 2rem;
+    color: #fbbf24;
+  }
+
+  h3 {
+    margin: 0;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    color: #ffffff;
+  }
+}
+
+.modal-body {
+  margin-bottom: 2rem;
+
+  p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+
+  button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+
+  .btn-confirm {
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    border: none;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #991b1b, #7f1d1d);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+    .spin {
+      animation: spin 1s linear infinite;
     }
   }
 }
@@ -491,6 +736,35 @@ const displayCompany = computed(() => {
   50% {
     filter: drop-shadow(0 0 15px rgba(75, 0, 130, 0.5));
     transform: scale(1.05);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 

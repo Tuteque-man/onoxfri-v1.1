@@ -349,8 +349,8 @@ const loadAdvancedModel = () => {
   currentLoadedModel = createAdvancedGeometry(geometryType)
 
   // Posicionar y animar el modelo
-  currentLoadedModel.position.set(0, 0, 0)
-  currentLoadedModel.rotation.set(0, 0, 0)
+  currentLoadedModel.position.set(0, 0, 0) // Centrado dentro de su panel
+  currentLoadedModel.rotation.set(0, 0.5, 0) // Rotar ligeramente para una mejor vista
 
   scene.add(currentLoadedModel)
 }
@@ -475,14 +475,16 @@ onMounted(() => {
 <style scoped>
 /* Contenedor principal de landing */
 .landing-container {
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   z-index: 2;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Fondo del landing más oscuro (solo para esta vista) */
@@ -525,30 +527,37 @@ onMounted(() => {
 }
 
 .hero-section {
-  display: flex;
+  position: relative; /* Necesario para el posicionamiento absoluto del hijo */
+  display: flex; /* Mantenemos flex para alinear el panel de texto */
   width: 100%;
   height: 65vh; /* Altura principal */
   max-width: 1400px;
   align-items: center;
-  margin-bottom: 15vh; /* Más espacio debajo */
+  margin-bottom: 10vh; /* Espacio debajo ajustado */
 }
 
 .model-panel {
-  width: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%; /* Ocupa la mitad izquierda de la pantalla */
   height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  z-index: 1; /* Detrás del texto */
+  pointer-events: auto; /* Permite la interacción con el modelo 3D */
 }
 
 .text-panel {
-  width: 50%;
-  padding-left: 4rem;
+  position: relative;
+  z-index: 2; /* Encima del modelo */
+  width: 50%; /* Ocupa la mitad derecha */
+  margin-left: auto; /* Se alinea a la derecha */
+  padding-right: 2rem; /* Espacio en el borde derecho */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start; /* Alinear a la izquierda del panel */
   text-align: left;
+  pointer-events: auto; /* Permite la interacción con el texto y botones */
 }
 
 .model-canvas {
@@ -731,20 +740,10 @@ onMounted(() => {
 
 /* Espaciado adicional entre modelo 3D y texto en escritorio */
 @media (min-width: 992px) {
-  .hero-section {
-    column-gap: 3rem; /* más separación entre columnas */
-  }
-  .model-panel {
-    padding-right: 2rem;
-  }
-
   .text-panel {
-    padding-left: 8rem; /* desplazar más a la derecha */
-  }
-
-  /* Mover los botones más a la izquierda sin afectar el texto */
-  .landing-cta {
-    margin-left: -5.5rem;
+    width: 45%; /* Un poco más de espacio para el texto en pantallas grandes */
+    max-width: 550px; /* Ancho máximo para el texto para mejorar legibilidad */
+    padding-right: 0; /* Quitamos el padding derecho, ya que se alinea con margin */
   }
 }
 
@@ -767,7 +766,8 @@ onMounted(() => {
 @media (max-width: 768px) {
   .landing-container {
     min-height: 100vh;
-    padding-top: 5vh;
+    padding-top: 18vh; /* Aumentado para dar más espacio arriba en móviles */
+    padding-bottom: 10vh; /* Añadido para dar más espacio abajo en móviles */
   }
 
   .landing-content {
@@ -782,13 +782,15 @@ onMounted(() => {
  }
 
  .model-panel {
+    position: relative; /* Restablecer posicionamiento */
     width: 100%;
     height: 300px;
     margin-bottom: 2rem;
+    pointer-events: auto; /* Permitir interacción en móvil */
  }
 
  .text-panel {
-    width: 100%;
+    width: 100%; /* Ocupa todo el ancho */
     margin-left: 0;
     padding: 0 1rem;
     align-items: center;

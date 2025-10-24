@@ -1,8 +1,12 @@
 <template>
-  <div class="layout">
+  <component :is="currentComponent" v-if="isMobile" />
+  <div v-else class="layout">
     <Sidebar />
 
     <main class="page">
+      <div class="page-header">
+        <h1><i class="bi bi-speedometer2"></i> Panel Principal</h1>
+      </div>
 
       <section class="kpis">
         <div class="kpi">
@@ -28,8 +32,13 @@
           <div class="card-header">
             <h3><i class="bi bi-graph-up-arrow"></i> Tendencia de Inventario</h3>
           </div>
-          <div class="card-body chart-placeholder">
-            <p>Gráfico (próximamente)</p>
+          <div class="card-body chart-container">
+            <div class="chart-wrapper">
+              <canvas ref="valueChart"></canvas>
+            </div>
+            <div class="chart-wrapper">
+              <canvas ref="productsChart"></canvas>
+            </div>
           </div>
         </div>
 
@@ -65,31 +74,250 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, onBeforeUnmount, onActivated, computed, defineAsyncComponent, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import Sidebar from '@/components/Sidebar.vue'
+import { Chart, registerables } from 'chart.js'
+
+Chart.register(...registerables)
+
+const MobileDashboard = defineAsyncComponent(() => import('./mobile/DashboardV2.vue'))
 
 const router = useRouter()
 
+const isMobile = ref(window.innerWidth <= 992)
+const currentComponent = computed(() => isMobile.value ? MobileDashboard : null)
+
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 992
+}
+
 const stats = reactive({ totalProductos: 0, stockBajo: 0, totalEmpresas: 0, valorInventario: '$0' })
 const productosStockBajo = ref([])
+const valueChart = ref(null)
+const productsChart = ref(null)
+let valueChartInstance = null
+let productsChartInstance = null
 const recentActivity = ref([
-  { icon: 'bi bi-plus-circle', text: 'Producto creado', time: 'Hace 1h' },
-  { icon: 'bi bi-pencil-square', text: 'Ajuste de stock', time: 'Hace 3h' },
-  { icon: 'bi bi-file-earmark-bar-graph', text: 'Reporte mensual exportado', time: 'Ayer' },
+  { icon: 'bi bi-plus-circle', text: 'Nuevo producto: Laptop Dell Inspiron 15', time: 'Hace 15 min' },
+  { icon: 'bi bi-exclamation-triangle', text: 'Alerta: Stock bajo en Teclado Mecánico RGB', time: 'Hace 1h' },
+  { icon: 'bi bi-pencil-square', text: 'Actualización de precio: Monitor Samsung 27"', time: 'Hace 2h' },
+  { icon: 'bi bi-box-seam', text: 'Pedido recibido: 50 unidades Mouse Logitech', time: 'Hace 3h' },
+  { icon: 'bi bi-person-plus', text: 'Nuevo usuario registrado: Carlos López', time: 'Hace 5h' },
+  { icon: 'bi bi-file-earmark-bar-graph', text: 'Reporte mensual generado exitosamente', time: 'Hace 8h' },
 ])
+
+const createValueChart = () => {
+  if (!valueChart.value) return
+  
+  if (valueChartInstance) {
+    valueChartInstance.destroy()
+  }
+
+  const ctx = valueChart.value.getContext('2d')
+  valueChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+      datasets: [
+        {
+          label: 'Valor Inventario ($)',
+          data: [32500, 35200, 38100, 36800, 39500, 41200, 42800, 43500, 44200, 45100, 45780, 45780],
+          borderColor: 'rgba(138, 43, 226, 1)',
+          backgroundColor: 'rgba(138, 43, 226, 0.15)',
+          borderWidth: 3,
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: '#8A2BE2',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'start',
+          labels: {
+            color: '#ffffff',
+            font: {
+              family: 'Space Grotesk',
+              size: 11
+            },
+            padding: 8,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(18, 0, 30, 0.95)',
+          titleColor: '#ffffff',
+          bodyColor: '#BD93FF',
+          borderColor: 'rgba(138, 43, 226, 0.5)',
+          borderWidth: 1,
+          padding: 10,
+          displayColors: true,
+          callbacks: {
+            label: function(context) {
+              return 'Valor: $' + context.parsed.y.toLocaleString()
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            color: 'rgba(138, 43, 226, 0.1)',
+            drawBorder: false
+          },
+          ticks: {
+            color: '#a89bb9',
+            font: {
+              family: 'Space Grotesk',
+              size: 10
+            }
+          }
+        },
+        y: {
+          grid: {
+            color: 'rgba(138, 43, 226, 0.1)',
+            drawBorder: false
+          },
+          ticks: {
+            color: '#a89bb9',
+            font: {
+              family: 'Space Grotesk',
+              size: 10
+            },
+            callback: function(value) {
+              return '$' + (value / 1000).toFixed(0) + 'k'
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+const createProductsChart = () => {
+  if (!productsChart.value) return
+  
+  if (productsChartInstance) {
+    productsChartInstance.destroy()
+  }
+
+  const ctx = productsChart.value.getContext('2d')
+  productsChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+      datasets: [
+        {
+          label: 'Productos Totales',
+          data: [95, 98, 105, 102, 110, 115, 118, 120, 123, 125, 127, 127],
+          backgroundColor: 'rgba(189, 147, 255, 0.6)',
+          borderColor: 'rgba(189, 147, 255, 1)',
+          borderWidth: 2,
+          borderRadius: 6,
+          hoverBackgroundColor: 'rgba(189, 147, 255, 0.8)'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'start',
+          labels: {
+            color: '#ffffff',
+            font: {
+              family: 'Space Grotesk',
+              size: 11
+            },
+            padding: 8,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(18, 0, 30, 0.95)',
+          titleColor: '#ffffff',
+          bodyColor: '#BD93FF',
+          borderColor: 'rgba(138, 43, 226, 0.5)',
+          borderWidth: 1,
+          padding: 10,
+          displayColors: true,
+          callbacks: {
+            label: function(context) {
+              return 'Productos: ' + context.parsed.y
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {
+            color: 'rgba(138, 43, 226, 0.1)',
+            drawBorder: false
+          },
+          ticks: {
+            color: '#a89bb9',
+            font: {
+              family: 'Space Grotesk',
+              size: 10
+            }
+          }
+        },
+        y: {
+          grid: {
+            color: 'rgba(138, 43, 226, 0.1)',
+            drawBorder: false
+          },
+          ticks: {
+            color: '#a89bb9',
+            font: {
+              family: 'Space Grotesk',
+              size: 10
+            },
+            stepSize: 20
+          }
+        }
+      }
+    }
+  })
+}
 
 const load = () => {
   // TODO: Reemplazar mocks por servicios reales
-  stats.totalProductos = 45
-  stats.stockBajo = 3
-  stats.totalEmpresas = 2
-  stats.valorInventario = '$12,450'
+  stats.totalProductos = 127
+  stats.stockBajo = 8
+  stats.totalEmpresas = 1
+  stats.valorInventario = '$45,780'
   productosStockBajo.value = [
-    { id: 1, name: 'Producto A', stock_actual: 2, min_stock: 5 },
-    { id: 2, name: 'Producto B', stock_actual: 1, min_stock: 3 },
-    { id: 3, name: 'Producto C', stock_actual: 0, min_stock: 2 }
+    { id: 1, name: 'Laptop Dell Inspiron 15', stock_actual: 2, min_stock: 5 },
+    { id: 2, name: 'Mouse Logitech MX Master', stock_actual: 1, min_stock: 10 },
+    { id: 3, name: 'Teclado Mecánico RGB', stock_actual: 0, min_stock: 8 },
+    { id: 4, name: 'Monitor Samsung 27"', stock_actual: 3, min_stock: 6 },
+    { id: 5, name: 'Webcam HD 1080p', stock_actual: 1, min_stock: 4 },
+    { id: 6, name: 'Auriculares Bluetooth', stock_actual: 2, min_stock: 12 },
+    { id: 7, name: 'Cable HDMI 2m', stock_actual: 4, min_stock: 15 },
+    { id: 8, name: 'Hub USB-C 7 puertos', stock_actual: 0, min_stock: 5 }
   ]
+  
+  // Crear gráficas después de cargar datos
+  nextTick(() => {
+    setTimeout(() => {
+      createValueChart()
+      createProductsChart()
+    }, 150)
+  })
 }
 
 const refresh = () => {
@@ -100,27 +328,105 @@ const go = (name) => router.push({ name })
 
 onMounted(() => {
   load()
+  window.addEventListener('resize', handleResize)
+})
+
+onActivated(() => {
+  // Recrear gráficas cuando el componente se reactiva
+  nextTick(() => {
+    setTimeout(() => {
+      if (valueChart.value) {
+        if (valueChartInstance) {
+          valueChartInstance.destroy()
+          valueChartInstance = null
+        }
+        createValueChart()
+      }
+      if (productsChart.value) {
+        if (productsChartInstance) {
+          productsChartInstance.destroy()
+          productsChartInstance = null
+        }
+        createProductsChart()
+      }
+    }, 100)
+  })
+})
+
+onBeforeUnmount(() => {
+  if (valueChartInstance) {
+    valueChartInstance.destroy()
+    valueChartInstance = null
+  }
+  if (productsChartInstance) {
+    productsChartInstance.destroy()
+    productsChartInstance = null
+  }
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
 <style scoped>
-.layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
-.page { position: relative; padding: 26px; }
-.page::before { content: ""; position: absolute; inset: 0; pointer-events: none; background:
-  radial-gradient(1200px 600px at 10% 10%, rgba(138,43,226,0.10), transparent 60%),
-  radial-gradient(900px 500px at 90% 20%, rgba(189,147,255,0.08), transparent 60%),
-  linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00)); }
-.page { position: relative; padding: 26px; overflow: hidden; }
+.layout { display: grid; grid-template-columns: 260px 1fr; height: 100vh; overflow: hidden; }
+.page { 
+  position: relative; 
+  padding: 26px; 
+  padding-bottom: 40px;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  
+  /* Scrollbar invisible por defecto */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  
+  /* Webkit browsers */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+  }
+  
+  /* Mostrar scrollbar al hacer hover */
+  &:hover {
+    scrollbar-color: rgba(138, 43, 226, 0.5) rgba(255, 255, 255, 0.05);
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(138, 43, 226, 0.6), rgba(189, 147, 255, 0.4));
+      
+      &:hover {
+        background: linear-gradient(180deg, rgba(138, 43, 226, 0.8), rgba(189, 147, 255, 0.6));
+      }
+    }
+  }
+}
 .page::before {
   content: "";
-  position: absolute;
-  inset: 0;
+  position: fixed;
+  top: 0;
+  left: 260px;
+  right: 0;
+  bottom: 0;
   pointer-events: none;
   background:
     radial-gradient(1200px 600px at 10% 10%, rgba(138,43,226,0.10), transparent 60%),
     radial-gradient(900px 500px at 90% 20%, rgba(189,147,255,0.08), transparent 60%),
     linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
   animation: background-pulse 12s infinite ease-in-out;
+  z-index: 0;
 }
 
 @keyframes background-pulse {
@@ -128,21 +434,11 @@ onMounted(() => {
   50% { transform: scale(1.02); opacity: 0.85; }
 }
 
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.page-header .title { display: flex; align-items: center; gap: 12px; }
-.page-header .title h1 { margin: 0; font-family: 'Orbitron', monospace; font-size: 1.8rem; letter-spacing: 1px; color: #ffffff; text-shadow: 0 0 8px rgba(255,255,255,.35), 0 0 16px rgba(255,255,255,.22); }
-.page-header .title h1 { margin: 0; font-family: 'Orbitron', monospace; font-size: 1.8rem; letter-spacing: 1px; color: #cba6ff; text-shadow: 0 0 10px rgba(203, 166, 255, 0.8), 0 0 22px rgba(138, 43, 226, 0.5); }
-.page-header .title h1 { margin: 0; font-family: 'Orbitron', monospace; font-size: 1.8rem; letter-spacing: 1px; color: #e6d8ff; text-shadow: 0 0 4px #fff, 0 0 12px #d9baff, 0 0 25px #cba6ff, 0 0 40px #8a2be2; }
-.page-header .title h1 { margin: 0; font-family: 'Orbitron', monospace; font-size: 1.8rem; letter-spacing: 1px; color: #f0ebff; text-shadow: 0 0 8px rgba(255,255,255,0.1); }
-.page-header .actions { display: flex; gap: 12px; }
+.page-header { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.page-header h1 { margin: 0; font-family: 'Orbitron', monospace; font-size: 1.8rem; color: #ffffff; display: flex; align-items: center; gap: 12px; text-shadow: 0 0 8px rgba(255,255,255,.35); }
 
-.page-header .actions .btn-futuristic { background: linear-gradient(135deg, #4B0082, #6B1FA8); color: #fff; border: 1px solid rgba(138,43,226,0.45); padding: 10px 14px; border-radius: 12px; box-shadow: 0 8px 24px rgba(138,43,226,0.25), inset 0 0 12px rgba(255,255,255,0.06); font-weight: 600; letter-spacing: .2px; }
-.page-header .actions .btn-futuristic i { margin-right: 8px; }
-.page-header .actions .btn-futuristic:hover { filter: brightness(1.08); box-shadow: 0 12px 30px rgba(138,43,226,0.3), inset 0 0 14px rgba(255,255,255,0.08); }
+.kpis, .grid { position: relative; z-index: 1; }
 
-.page-header .actions .btn-ghost-futuristic { background: rgba(255,255,255,0.04); color: #eae3f7; border: 1px solid rgba(138,43,226,0.35); padding: 10px 14px; border-radius: 12px; box-shadow: inset 0 0 10px rgba(255,255,255,0.04); font-weight: 600; letter-spacing: .2px; }
-.page-header .actions .btn-ghost-futuristic i { margin-right: 8px; }
-.page-header .actions .btn-ghost-futuristic:hover { background: rgba(255,255,255,0.07); }
 .kpis { display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: 16px; margin-bottom: 26px; }
 .kpi {
   position: relative;
@@ -184,6 +480,8 @@ onMounted(() => {
 .card-header { padding: 14px 16px; background: linear-gradient(135deg, rgba(189,147,255,0.10), rgba(138,43,226,0.10)); border-bottom: 1px solid rgba(138,43,226,0.3); }
 .card-header h3 { margin: 0; font-family: 'Space Grotesk', sans-serif; color: #ffffff; font-weight: 700; font-size: 1.08rem; display: flex; align-items: center; gap: 8px; text-shadow: 0 0 6px rgba(255,255,255,.25); }
 .card-body { padding: 16px; }
+.card-body.chart-container { display: flex; flex-direction: column; gap: 20px; }
+.chart-wrapper { height: 180px; width: 100%; position: relative; }
 .card + .card, .span2 { margin-top: 0; }
 .span2 { grid-column: span 2; }
 

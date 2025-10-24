@@ -2,9 +2,6 @@
    ESTILOS GLOBALES ONOXFRI - TEMA FUTURISTA
    ===================================================== */
 
-/* Importar estilos principales */
-@import './assets/styles/main.scss';
-
 /* Estilos adicionales específicos */
 .glass-effect {
   background: rgba(255, 255, 255, 0.1);

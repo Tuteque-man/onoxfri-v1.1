@@ -2,6 +2,36 @@
 
 Backend básico pero funcional desarrollado en PHP puro para el sistema de inventario onoxfri.
 
+## 👥 Equipo de Desarrollo
+
+**Proyecto desarrollado por:**
+- **Angello** - Desarrollador Full Stack
+- **Jesús** - Desarrollador Full Stack
+- **Kevin** - Desarrollador Full Stack
+
+## 🗄️ Base de Datos Actualizada
+
+**Versión actual:** `new_scheme.sql`
+
+Se ha modificado y actualizado completamente el esquema de base de datos del sistema. El nuevo esquema (`database/new_scheme.sql`) incluye:
+
+### Cambios Principales:
+- ✅ **Estructura optimizada** de tablas `users`, `empresas`, `roles` y `empresa_roles`
+- ✅ **Restricciones de integridad referencial** mejoradas con foreign keys compuestas
+- ✅ **Trigger de validación** para limitar a 3 roles por empresa
+- ✅ **Campos normalizados**: `nombre`, `apellido`, `nombre_usuario`, `nombre_empresa`
+- ✅ **Relación empresa-rol-usuario** con validación automática
+- ✅ **Constraint único** para garantizar 1 usuario por rol por empresa
+- ✅ **Timestamps automáticos** con `created_at` y `updated_at`
+
+### Tablas Principales:
+1. **roles** - Roles del sistema (Superusuario, Gerente, Asistente)
+2. **empresas** - Información de empresas registradas
+3. **empresa_roles** - Relación entre empresas y roles (máximo 3 roles por empresa)
+4. **users** - Usuarios del sistema con relación a empresa y rol
+
+**Archivo de esquema:** `database/new_scheme.sql`
+
 ## Estructura del Proyecto
 
 ```

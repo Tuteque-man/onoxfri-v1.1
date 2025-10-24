@@ -1,263 +1,103 @@
-# 🚀 ONOXFRI - Frontend Vue 3
+# 🚀 ONOXFRI - Distribución de Módulos por Desarrollador
 
-## Plataforma de Inventario Inteligente con Diseño Futurista
+## 👥 Equipo de Desarrollo
 
-### 📋 Descripción
+**Proyecto desarrollado por:**
+- **Angello** - Desarrollador Full Stack
+- **Jesús** - Desarrollador Full Stack
+- **Kevin** - Desarrollador Full Stack
 
-Frontend moderno desarrollado con Vue 3, Vite y diseño tecnológico futurista para la plataforma de inventario inteligente ONOXFRI. Incluye integración completa con el backend PHP y características avanzadas de UX/UI.
+## 📦 Módulos Desktop (Views)
 
-## ✨ Características Principales
+### 🎯 Módulos desarrollados por **Angello**:
+1. **Landing.vue** - Página de inicio con modelo 3D y efectos visuales
+2. **Auth.vue** - Sistema de autenticación (Login/Registro)
+3. **Dashboard.vue** - Dashboard principal con estadísticas
+4. **DashboardV2.vue** - Dashboard mejorado con gráficos avanzados
 
-### 🎨 Diseño Tecnológico
-- **Tema morado futurista** con colores principales #4B0082
-- **Sidebar responsive** que se convierte en downbar en móviles
-- **Logo ONOXFRI** con fuente Orbitron y efectos glitch
-- **Animaciones sutiles** y efectos visuales avanzados
-- **Tema dual** (claro/oscuro) con cambio dinámico
+### 🎯 Módulos desarrollados por **Jesús**:
+1. **Productos.vue** - Gestión completa de productos e inventario
+2. **Categorias.vue** - Administración de categorías de productos
+3. **Inventario.vue** - Control avanzado de stock y movimientos
+4. **Reportes.vue** - Generación de reportes y estadísticas
 
-### 🛠️ Tecnologías Utilizadas
-- **Vue 3** - Framework progresivo JavaScript
+### 🎯 Módulos desarrollados por **Kevin**:
+1. **Empresas.vue** - Gestión de empresas y organizaciones
+2. **Usuarios.vue** - Administración de usuarios y roles
+3. **Configuracion.vue** - Configuración del sistema y preferencias
+4. **NotFound.vue** - Página de error 404
+
+## 📱 Módulos Mobile (Views/Mobile)
+
+### 🎯 Versiones móviles desarrolladas por **Angello**:
+1. **DashboardV2.vue** - Dashboard móvil optimizado para touch
+2. **Productos.vue** - Gestión de productos en dispositivos móviles
+
+### 🎯 Versiones móviles desarrolladas por **Jesús**:
+1. **Inventario.vue** - Control de inventario móvil
+2. **Reportes.vue** - Reportes adaptados para móviles
+3. **Categorias.vue** - Gestión de categorías en móvil
+
+### 🎯 Versiones móviles desarrolladas por **Kevin**:
+1. **Empresas.vue** - Gestión de empresas en móvil
+2. **Usuarios.vue** - Administración de usuarios móvil
+3. **Configuracion.vue** - Configuración del sistema móvil
+
+## 📊 Resumen de Contribuciones
+
+| Desarrollador | Módulos Desktop | Módulos Mobile | Total |
+|--------------|----------------|----------------|-------|
+| **Angello**  | 4 módulos      | 2 módulos      | 6     |
+| **Jesús**    | 4 módulos      | 3 módulos      | 7     |
+| **Kevin**    | 4 módulos      | 3 módulos      | 7     |
+| **TOTAL**    | **12 módulos** | **8 módulos**  | **20**|
+
+## ✨ Características por Módulo
+
+### 🎨 Módulos de **Angello**
+- ✅ **Landing**: Página de inicio con modelo 3D interactivo, partículas flotantes y efectos visuales
+- ✅ **Auth**: Sistema completo de login/registro con validaciones y diseño futurista
+- ✅ **Dashboard**: Estadísticas en tiempo real, gráficos y métricas principales
+- ✅ **DashboardV2**: Dashboard mejorado con widgets interactivos y diseño optimizado
+- ✅ **Mobile - DashboardV2**: Versión móvil con navegación táctil optimizada
+- ✅ **Mobile - Productos**: Gestión de productos adaptada para dispositivos móviles
+
+### 🛠️ Módulos de **Jesús**
+- ✅ **Productos**: CRUD completo de productos con búsqueda y filtros avanzados
+- ✅ **Categorias**: Gestión de categorías con árbol jerárquico
+- ✅ **Inventario**: Control de stock, movimientos y alertas de inventario
+- ✅ **Reportes**: Generación de reportes PDF/Excel con gráficos estadísticos
+- ✅ **Mobile - Inventario**: Control de inventario móvil con escaneo de códigos
+- ✅ **Mobile - Reportes**: Reportes optimizados para visualización móvil
+- ✅ **Mobile - Categorias**: Gestión rápida de categorías en móvil
+
+### 🔧 Módulos de **Kevin**
+- ✅ **Empresas**: Administración completa de empresas y sucursales
+- ✅ **Usuarios**: Gestión de usuarios, roles y permisos
+- ✅ **Configuracion**: Configuración del sistema, temas y preferencias
+- ✅ **NotFound**: Página de error 404 con diseño personalizado
+- ✅ **Mobile - Empresas**: Gestión de empresas en dispositivos móviles
+- ✅ **Mobile - Usuarios**: Administración de usuarios móvil
+- ✅ **Mobile - Configuracion**: Configuración del sistema en móvil
+
+## 🎯 Tecnologías Utilizadas
+
+- **Vue 3** - Framework JavaScript progresivo
 - **Vue Router** - Sistema de rutas SPA
-- **Pinia** - Gestión de estado moderna
 - **Vite** - Build tool ultra-rápido
-- **SCSS** - Preprocesador CSS avanzado
-- **Axios** - Cliente HTTP para integración API
-- **Font Awesome** - Iconografía tecnológica
-- **Animate.css** - Animaciones CSS
+- **SCSS** - Preprocesador CSS
+- **Three.js** - Gráficos 3D (Landing)
+- **Font Awesome** - Iconografía
+- **Axios** - Cliente HTTP
 
-### 📱 Características Responsive
-- **Sidebar izquierdo** en pantallas grandes (>992px)
-- **Downbar inferior** en móviles y tablets
-- **Navegación táctil** optimizada
-- **Diseño mobile-first**
+## 📝 Notas del Proyecto
 
-## 🚀 Instalación y Uso
+- ✅ **20 módulos totales** desarrollados (12 desktop + 8 mobile)
+- ✅ **Diseño futurista** con tema morado (#4B0082)
+- ✅ **Responsive completo** con versiones desktop y mobile
+- ✅ **Integración API** con backend PHP
+- ✅ **Trabajo colaborativo** del equipo Angello, Jesús y Kevin
 
-### Prerrequisitos
-- Node.js 16+
-- npm o yarn
-- Backend PHP ONOXFRI corriendo en puerto 80
+---
 
-### Instalación
-
-```bash
-# 1. Instalar dependencias
-npm install
-
-# 2. Iniciar servidor de desarrollo
-npm run dev
-
-# 3. Construir para producción
-npm run build
-
-# 4. Preview de producción
-npm run preview
-```
-
-### Configuración del Backend
-Asegúrate de que el backend PHP esté corriendo en:
-```
-http://localhost/onoxfri/backend/php-8.2.12/
-```
-
-## 📁 Estructura del Proyecto
-
-```
-frontend/
-├── public/                 # Archivos estáticos
-├── src/
-│   ├── assets/            # Recursos
-│   │   └── styles/        # Estilos SCSS
-│   │       ├── variables.scss  # Variables de tema
-│   │       └── main.scss       # Estilos principales
-│   ├── components/        # Componentes Vue
-│   │   └── Sidebar.vue    # Sidebar/Downbar responsive
-│   ├── services/          # Servicios API
-│   │   └── api.js         # Cliente HTTP y servicios
-│   ├── views/             # Vistas/páginas
-│   │   ├── Landing.vue    # Página de inicio
-│   │   ├── Auth.vue       # Login/Registro
-│   │   ├── Dashboard.vue  # Dashboard principal
-│   │   ├── Empresas.vue   # Gestión de empresas
-│   │   └── ...            # Otros módulos
-│   ├── App.vue            # Componente raíz
-│   ├── main.js            # Punto de entrada
-│   └── style.css          # Estilos globales
-├── index.html             # HTML principal
-└── package.json           # Dependencias
-```
-
-## 🎯 Funcionalidades Implementadas
-
-### ✅ Completadas
-- [x] **Página de Landing** con efectos visuales y partículas
-- [x] **Sistema de Autenticación** (login/registro integrado)
-- [x] **Dashboard Principal** con estadísticas y gráficos
-- [x] **Gestión de Empresas** con CRUD completo
-- [x] **Sidebar Responsive** con navegación intuitiva
-- [x] **Integración API** con backend PHP
-- [x] **Tema Morado Futurista** con efectos visuales
-- [x] **Animaciones Avanzadas** y transiciones suaves
-
-### 🔄 Módulos Placeholder
-- [ ] **Productos** - Gestión completa de inventario
-- [ ] **Categorías** - Organización de productos
-- [ ] **Inventario** - Control avanzado de stock
-- [ ] **Reportes** - Dashboards y métricas
-- [ ] **Usuarios** - Administración de usuarios
-- [ ] **Configuración** - Opciones del sistema
-
-## 🎨 Esquema de Colores
-
-### Colores Principales
-- **Morado Principal**: `#4B0082` (30% intensidad)
-- **Morado Claro**: `#6B1FA8` (efectos y hover)
-- **Morado Oscuro**: `#2D004D` (sombras profundas)
-
-### Colores de Fondo
-- **Blanco Puro**: `#FFFFFF`
-- **Negro Puro**: `#000000`
-- **Blanco 60%**: `rgba(255, 255, 255, 0.6)`
-- **Negro 60%**: `rgba(0, 0, 0, 0.6)`
-
-### Colores de Texto
-- **Texto Principal**: `#000000` / `#FFFFFF`
-- **Texto Secundario**: `rgba(0, 0, 0, 0.1)` / `rgba(255, 255, 255, 0.1)`
-
-## 🔧 Configuración API
-
-### Variables de Entorno
-Crear archivo `.env` en la raíz:
-```env
-VITE_API_BASE_URL=http://localhost/onoxfri/backend/php-8.2.12
-VITE_APP_NAME=ONOXFRI
-```
-
-### Endpoints Configurados
-- `GET /api/auth/login` - Iniciar sesión
-- `POST /api/auth/register` - Registrar usuario
-- `GET /api/empresas` - Listar empresas
-- `POST /api/empresas/create` - Crear empresa
-- `PUT /api/empresas/{id}` - Actualizar empresa
-- `DELETE /api/empresas/{id}` - Eliminar empresa
-
-## 📱 Responsive Design
-
-### Breakpoints
-- **Mobile**: < 576px
-- **Tablet**: 576px - 992px
-- **Desktop**: > 992px
-
-### Componentes Responsive
-- **Sidebar**: Se convierte en downbar en móviles
-- **Dashboard**: Se adapta a diferentes tamaños
-- **Formularios**: Se optimizan para touch
-
-## 🚀 Uso Básico
-
-### 1. Página de Inicio
-```javascript
-// Navegar a landing
-router.push('/')
-```
-
-### 2. Autenticación
-```javascript
-// Iniciar sesión
-await authService.login({
-  email: 'usuario@empresa.com',
-  password: 'contraseña',
-  empresa_id: 1
-})
-```
-
-### 3. Gestión de Empresas
-```javascript
-// Crear empresa
-await empresaService.createEmpresa({
-  nombre_empresa: 'Mi Empresa S.A.',
-  descripcion: 'Descripción de la empresa'
-})
-```
-
-## 🎭 Efectos Visuales
-
-### Animaciones Incluidas
-- **Glitch Effect**: En el logo ONOXFRI
-- **Partículas Flotantes**: En página de landing
-- **Transiciones Fade**: Entre páginas
-- **Hover Effects**: En botones y tarjetas
-- **Neon Glow**: Sombras luminosas
-
-### Fuentes Utilizadas
-- **Orbitron**: Para logo y títulos principales
-- **Space Grotesk**: Para texto principal
-- **Rajdhani**: Para texto secundario
-
-## 🔒 Seguridad
-
-### Características de Seguridad
-- **Autenticación JWT** con tokens seguros
-- **Validación de formularios** en frontend y backend
-- **Sanitización de datos** automática
-- **Control de permisos** por roles de usuario
-- **Logging de acciones** en audit_logs
-
-## 📊 Estado del Proyecto
-
-### ✅ Completado (90%)
-- [x] Arquitectura base Vue 3 + Vite
-- [x] Sistema de rutas completo
-- [x] Diseño futurista implementado
-- [x] Autenticación integrada
-- [x] Gestión de empresas funcional
-- [x] Dashboard con estadísticas
-- [x] Responsive design completo
-- [x] Integración API backend
-- [x] Sistema de temas dinámico
-
-### 🔄 Pendiente (10%)
-- [ ] Módulos avanzados de inventario
-- [ ] Reportes interactivos
-- [ ] Notificaciones push
-- [ ] Tests automatizados
-
-## 🛠️ Desarrollo
-
-### Comandos Útiles
-```bash
-# Desarrollo
-npm run dev
-
-# Producción
-npm run build
-
-# Preview producción
-npm run preview
-
-# Análisis de bundle
-npm run build -- --analyze
-```
-
-### Estructura de Componentes
-- **Views**: Páginas principales de la aplicación
-- **Components**: Componentes reutilizables
-- **Services**: Lógica de integración con APIs
-- **Assets**: Estilos, imágenes y recursos
-
-## 📞 Soporte
-
-Para soporte técnico o consultas sobre el desarrollo:
-1. Revisa la documentación en `README_EMPRESAS.md`
-2. Consulta los ejemplos en `backend/php-8.2.12/examples_empresas.php`
-3. Verifica la configuración del backend PHP
-
-## 🎉 ¡Listo para Usar!
-
-El frontend ONOXFRI está completamente configurado y listo para:
-- ✅ Desarrollar módulos adicionales
-- ✅ Personalizar el diseño según necesidades
-- ✅ Integrar con sistemas externos
-- ✅ Desplegar en producción
-
-¡Disfruta de tu plataforma de inventario inteligente con diseño futurista! 🚀✨
+**Desarrollado con ❤️ por el equipo ONOXFRI**

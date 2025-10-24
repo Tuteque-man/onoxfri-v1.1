@@ -2,7 +2,7 @@
   <div class="mobile-layout">
     <main class="mobile-page">
       <div class="page-header">
-        <h1><i class="bi bi-speedometer2"></i> Panel Principal</h1>
+        <h1><i class="bi bi-grid-1x2-fill"></i> Panel Principal</h1>
       </div>
 
       <section class="kpis">

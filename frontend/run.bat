@@ -10,19 +10,29 @@ echo 🚀 ONOXFRI - Plataforma de Inventario Inteligente
 echo =====================================================
 echo.
 echo 🎨 Frontend Vue 3 con diseño futurista
-echo 📂 Directorio: %cd%\frontend
+echo 📂 Directorio: %cd%
 echo 🌐 URL: http://localhost:5173
 echo.
 echo =====================================================
 echo.
 
-cd frontend
+REM Verificar si npm está instalado
+where npm >nul 2>&1
+if errorlevel 1 (
+    echo ❌ ERROR: npm no encontrado en el sistema.
+    echo.
+    echo Por favor instala Node.js desde: https://nodejs.org/
+    echo.
+    echo Presiona cualquier tecla para cerrar...
+    pause >nul
+    exit /b 1
+)
 
 echo 🔍 Verificando dependencias...
 if not exist node_modules (
     echo 📦 Instalando dependencias por primera vez...
     echo.
-    npm install
+    call npm install
     if errorlevel 1 (
         echo ❌ Error al instalar dependencias
         echo 💡 Verifica que Node.js este instalado correctamente
@@ -42,7 +52,17 @@ echo.
 echo =====================================================
 echo.
 
-npm run dev
+call npm run dev
+
+if errorlevel 1 (
+    echo.
+    echo =====================================================
+    echo ❌ ERROR: El servidor no pudo iniciarse
+    echo =====================================================
+    echo.
+    pause
+    exit /b 1
+)
 
 echo.
 echo =====================================================
